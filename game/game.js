@@ -19993,7 +19993,7 @@ var version = "v1.17.3";
             let newY = y;
             let playerXOffset;
             if (fallTypes[1] === "up") {
-              playerXOffset = (playerX + 270 * playerDir - x) * 3 * playerDir;
+              playerXOffset = (playerX + 240 * playerDir - x) * 3 * playerDir;
               if (playerXOffset < 0) {
                 newY += playerXOffset;
               }
@@ -45571,6 +45571,18 @@ var version = "v1.17.3";
                 bpm: 180,
                 isBonusSong: true,
               },
+              robotLanguage: {
+                name: "Robot Language",
+                author: "meganeko",
+                bpm: 132,
+                fileName: "audio/tracks/meganeko-robot-language.mp3",
+              },
+              paradiseOnE: {
+                name: "Paradise On E",
+                author: "B0UNC3 (apimusic remix)",
+                bpm: 147,
+                fileName: "audio/tracks/bounce-paradise-on-e.mp3"
+              },
               heaven: {
                 name: "Heaven",
                 author: "EnV",
@@ -45784,12 +45796,7 @@ var version = "v1.17.3";
                 bpm: 128,
                 fileName: "audio/tracks/djvi-carnival.mp3",
               },
-              robotLanguage: {
-                name: "Robot Language",
-                author: "meganeko",
-                bpm: 132,
-                fileName: "audio/tracks/meganeko-robot-language.mp3",
-              },
+              
               dryOut: {
                 name: "Dry Out",
                 author: "DJVI",
@@ -49446,6 +49453,7 @@ var version = "v1.17.3";
             e[(e.Phobos = 65)] = "Phobos";
             e[(e.RockinThatBass = 66)] = "RockinThatBass";
             e[(e.MilkyWays = 67)] = "MilkyWays";
+            e[(e.ParadiseOnE = 68)] = "ParadiseOnE";
           })(Nd || (Nd = {})),
           (function (e) {
             ((e[(e.World1 = 0)] = "World1"),
@@ -50410,7 +50418,8 @@ var version = "v1.17.3";
             [Nd.Carnivores]: hl.songs.carnivores,
             [Nd.Phobos]: hl.songs.phobos,
             [Nd.RockinThatBass]: hl.songs.rockinThatBass,
-            [Nd.MilkyWays]: hl.songs.milkyWays
+            [Nd.MilkyWays]: hl.songs.milkyWays,
+            [Nd.ParadiseOnE]: hl.songs.paradiseOnE
           },
           Hd = {
             [ld.Rot0]: 0,
