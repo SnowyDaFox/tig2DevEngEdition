@@ -45580,7 +45580,7 @@ var version = "v1.17.3";
               paradiseOnE: {
                 name: "Paradise On E",
                 author: "B0UNC3 (apimusic remix)",
-                bpm: 147,
+                bpm: 148,
                 fileName: "audio/tracks/bounce-paradise-on-e.mp3"
               },
               heaven: {
