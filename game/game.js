@@ -45542,6 +45542,13 @@ var version = "v1.17.3";
                 label: "Wolf Beats",
                 isBonusSong: false,
               },
+              rattlesnake: {
+                name: "Rattlesnake",
+                author: "Evilwave & Teminite",
+                fileName: "audio/tracks/evilwave-rattlesnake.mp3",
+                bpm: 150,
+                isBonusSong: false,
+              },
               mutant: {
                 name: "Mutant",
                 author: "Evilwave & Teminite (ft. Prey For Me)",
@@ -47436,9 +47443,9 @@ var version = "v1.17.3";
               difficulty: 5,
             },
             {
-              levelName: "Mutant",
-              levelFileName: "mutant",
-              song: hl.songs.mutant,
+              levelName: "Rattlesnake",
+              levelFileName: "rattlesnake",
+              song: hl.songs.rattlesnake,
               unlockedByIndex: 2,
               x: 140,
               y: -120,
@@ -47448,6 +47455,7 @@ var version = "v1.17.3";
               ],
               maxFrames: 11714,
               difficulty: 10,
+              comingSoon: true,
             },
             {
               levelName: "Overdrive",
@@ -49454,6 +49462,7 @@ var version = "v1.17.3";
             e[(e.RockinThatBass = 66)] = "RockinThatBass";
             e[(e.MilkyWays = 67)] = "MilkyWays";
             e[(e.ParadiseOnE = 68)] = "ParadiseOnE";
+            e[(e.Rattlesnake = 69)] = "Rattlesnake";
           })(Nd || (Nd = {})),
           (function (e) {
             ((e[(e.World1 = 0)] = "World1"),
@@ -50419,7 +50428,8 @@ var version = "v1.17.3";
             [Nd.Phobos]: hl.songs.phobos,
             [Nd.RockinThatBass]: hl.songs.rockinThatBass,
             [Nd.MilkyWays]: hl.songs.milkyWays,
-            [Nd.ParadiseOnE]: hl.songs.paradiseOnE
+            [Nd.ParadiseOnE]: hl.songs.paradiseOnE,
+            [Nd.Rattlesnake]: hl.songs.rattlesnake,
           },
           Hd = {
             [ld.Rot0]: 0,
