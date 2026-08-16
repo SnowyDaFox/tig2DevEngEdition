@@ -3,7 +3,7 @@ var game;
 var bgOnly = false,
   showcaseOnly = false;
 
-var version = "v1.17.2";
+var version = "v1.17.3";
 (() => {
   var e = {
     8465: (e, t, a) => {
@@ -19857,6 +19857,24 @@ var version = "v1.17.2";
               s = i + e.speedY;
             (e.position.unshift([n, s]),
               Wa < e.position.length && (e.position.length = Wa));
+            if (typeof playerX == "undefined" || playerX === null) {
+              return y;
+            }
+            let newY = y;
+            let playerXOffset;
+            if (fallTypes[1] === "up") {
+              playerXOffset = (playerX + 240 * playerDir - x) * 3 * playerDir;
+              if (playerXOffset < 0) {
+                newY += playerXOffset;
+              }
+            }
+            if (fallTypes[0] === "down") {
+              playerXOffset = -(playerX - 60 * playerDir - x) * playerDir;
+              if (playerXOffset < 0) {
+                newY += playerXOffset;
+              }
+            }
+            return newY;
           },
           render({ state: e, props: t }) {
             const a = () => e.frame >= e.missileFrames;
@@ -35344,89 +35362,68 @@ var version = "v1.17.2";
                         ),
                       ];
                     }
-                    if (e.isEditor && !e.spineContext)
-                      return [
-                        y(
-                          {
-                            fileName:
-                              "images/editor/editorOnly/block-switch-button.png",
-                            width: e.switchButton.width,
-                            height: e.switchButton.height,
-                          },
-                          (t) => {
-                            ((t.x = e.switchButton.x),
-                              (t.y = getBlockFallY(
-                                e.switchButton.x,
-                                e.switchButton.y,
-                                e.inGame && e.inGame.playerX,
-                                e.inGame && e.inGame.fallTypes,
-                                e.inGame && e.inGame.playerDir,
-                              )));
-                          },
-                        ),
-                      ];
-                    const { animationAssets: i, animationRenderer: n } =
-                      e.spineContext || t(Ws);
-                    return [
-                      onChange(
-                        () => e.switchBlockSpikes,
-                        () => {
-                          var t;
-                          return [
-                            Hs(
-                              {
-                                id: "BlockSpike",
-                                animationAssets: i,
-                                animationRenderer: n,
-                                fileNames: Qs.spineFiles.blockSwitchButton,
-                                animationName: e.switchBlockSpikes
-                                  ? "switch_1"
-                                  : "switch_2",
-                                loop: false,
-                                paused: e.paused || false,
-                                startFromFrame: a.justHitTimer > 0 ? 0 : 400,
-                                height: 0,
-                                x: e.switchButton.x,
-                                y: getBlockFallY(
-                                  e.switchButton.x,
-                                  e.switchButton.y,
-                                  e.inGame && e.inGame.playerX,
-                                  e.inGame && e.inGame.fallTypes,
-                                  e.inGame && e.inGame.playerDir,
-                                ),
-                                df:
-                                  a.justHitTimer > 0
-                                    ? 1.5 *
-                                    (null !== (t = e.df) && void 0 !== t
-                                      ? t
-                                      : 1)
-                                    : 0,
-                              },
-                              (t) => {
-                                var i;
-                                ((t.scale = {
-                                  x: e.scale || 1,
-                                  y: e.scale || 1,
-                                }),
-                                  (t.x = e.switchButton.x),
-                                  (t.y = getBlockFallY(
-                                    e.switchButton.x,
-                                    e.switchButton.y,
-                                    e.inGame && e.inGame.playerX,
-                                    e.inGame && e.inGame.fallTypes,
-                                    e.inGame && e.inGame.playerDir,
-                                  )),
-                                  (t.paused = e.paused || false),
-                                  (t.df =
-                                    a.justHitTimer > 0
-                                      ? 1.5 *
-                                      (null !== (i = e.df) && void 0 !== i
-                                        ? i
-                                        : 1)
-                                      : 0));
-                              },
-                            ),
-                          ];
+                  }
+                },
+              ),
+            ],
+          }),
+          Po = makeSprite({
+            render: ({ props: e }) => [
+              // real switch
+              imageArray({
+                fileName: `images/themes/${e.theme}/switch-platform.png`,
+                props: (e) => ({ width: e.width, height: e.height }),
+                update: (n, t) => {
+                  const a = -t.width / 2 + t.height / 2;
+                  ((n.anchorX = a),
+                    (n.x = t.x + a),
+                    (n.y = getBlockFallY(
+                      t.x,
+                      t.y,
+                      e.inGame && e.inGame.playerX,
+                      e.inGame && e.inGame.fallTypes,
+                      e.inGame && e.inGame.playerDir,
+                    )));
+                    n.rotation =
+                      t.rotation;
+                  n.scaleY = n.direction == 0 || n.direction == 180 ? -1 : 1;
+                },
+                array: () => e.switchPlatforms,
+              }),
+              // editor only
+              ifConditional(
+                () => void 0 !== e.editor,
+                () => [
+                  imageArray({
+                    fileName: `images/themes/${e.theme}/switch-platform.png`,
+                    props: (e) => ({
+                      width: e.width,
+                      height: e.height,
+                      opacity: 0.3,
+                    }),
+                    update: (e, t) => {
+                      const a = -t.width / 2 + t.height / 2;
+                      ((e.anchorX = a),
+                        (e.x = t.x + a),
+                        (e.y = t.y),
+                        (e.rotation =
+                          (0 === t.rotation - t.direction ? -90 : 0) + t.direction));
+                    },
+                    array: () => e.switchPlatforms,
+                  }),
+                  ifConditional(
+                    () => void 0 !== e.editor.previewRots,
+                    () => [
+                      g({
+                        props: () => ({ color: "blue", opacity: 0.5 }),
+                        update: (t, a, i) => {
+                          const n = -a.width / 2 + a.height / 2;
+                          ((t.width = a.width),
+                            (t.height = a.height),
+                            (t.x = a.x + n),
+                            (t.y = a.y),
+                            (t.anchorX = n),
+                            (t.rotation = e.editor.previewRots[i]));
                         },
                       ),
                     ];
@@ -37899,6 +37896,2503 @@ var version = "v1.17.2";
                             });
                           },
                         },
+                        {
+                          name: "Invisible",
+                          selected: t.isFade,
+                          onPress: () => {
+                            a.map((j) => {
+                              e({
+                                type: "setProperty",
+                                array: "spikes",
+                                index: j,
+                                set: (e) =>
+                                  Object.assign(Object.assign({}, e), {
+                                    isLaser: false,
+                                    isFade: true,
+                                  }),
+                              });
+                            });
+                          },
+                        },
+                      ],
+                    },
+                  ];
+                  if (debug) {
+                    all.push({
+                      name: "Skip Missiles",
+                      options: [
+                        {
+                          name: "On",
+                          selected: t.skipMissiles,
+                          onPress: () => {
+                            a.map((j) => {
+                              e({
+                                type: "setProperty",
+                                array: "spikes",
+                                index: j,
+                                set: (e) =>
+                                  Object.assign(Object.assign({}, e), {
+                                    skipMissiles: true,
+                                  }),
+                              });
+                            });
+                          },
+                        },
+                        {
+                          name: "Off",
+                          selected: !t.skipMissiles,
+                          onPress: () => {
+                            a.map((j) => {
+                              e({
+                                type: "setProperty",
+                                array: "spikes",
+                                index: j,
+                                set: (e) =>
+                                  Object.assign(Object.assign({}, e), {
+                                    skipMissiles: false,
+                                  }),
+                              });
+                            });
+                          },
+                        },
+                      ],
+                    });
+                  }
+                  return all;
+                })(e, t, i);
+              case "portal":
+                return (function (e, t, a) {
+                  const i = (e, t, i) => {
+                    const n = Ca.removeObject(t, "portals", a);
+                    return (
+                      Da.moveObjectUntilCanPlace(
+                        n,
+                        Object.assign(Object.assign({}, e), { direction: i }),
+                      ) || null
+                    );
+                  };
+                  return [
+                    {
+                      name: "Direction",
+                      options: [
+                        {
+                          name: "Left",
+                          selected: "left" === t.direction,
+                          onPress: () => {
+                            a.map((j) => {
+                              e({
+                                type: "setProperty",
+                                array: "portals",
+                                index: j,
+                                set: (e, t) => i(e, t, "left"),
+                              });
+                            });
+                          },
+                        },
+                        {
+                          name: "Down",
+                          selected: "down" === t.direction,
+                          onPress: () => {
+                            a.map((j) => {
+                              e({
+                                type: "setProperty",
+                                array: "portals",
+                                index: j,
+                                set: (e, t) => i(e, t, "down"),
+                              });
+                            });
+                          },
+                        },
+                        {
+                          name: "Right",
+                          selected: "right" === t.direction,
+                          onPress: () => {
+                            a.map((j) => {
+                              e({
+                                type: "setProperty",
+                                array: "portals",
+                                index: j,
+                                set: (e, t) => i(e, t, "right"),
+                              });
+                            });
+                          },
+                        },
+                        {
+                          name: "Up",
+                          selected: "up" === t.direction,
+                          onPress: () => {
+                            a.map((j) => {
+                              e({
+                                type: "setProperty",
+                                array: "portals",
+                                index: j,
+                                set: (e, t) => i(e, t, "up"),
+                              });
+                            });
+                          },
+                        },
+                      ],
+                    },
+                    {
+                      name: "Portal ID",
+                      options: [
+                        {
+                          name: String(t.pairId),
+                          selected: true,
+                          onPress: () => null,
+                        },
+                      ],
+                    },
+                  ];
+                })(e, t, i);
+              case "switchButton":
+                return (function (e, t, a, i) {
+                  var j =
+                    a.includes("switchBlockSpike") && a.includes("switchButton")
+                      ? [
+                          {
+                            name: "Affects",
+                            options: [
+                              {
+                                name: "Movement",
+                                selected: "movement" === t.affects,
+                                onPress: () => {
+                                  i.map((j) => {
+                                    e({
+                                      type: "setProperty",
+                                      array: "switchButtons",
+                                      index: j,
+                                      set: (e) =>
+                                        Object.assign(Object.assign({}, e), {
+                                          affects: "movement",
+                                        }),
+                                    });
+                                  });
+                                },
+                              },
+                              {
+                                name: "Block / Spikes",
+                                selected: "blockSpike" === t.affects,
+                                onPress: () => {
+                                  i.map((j) => {
+                                    e({
+                                      type: "setProperty",
+                                      array: "switchButtons",
+                                      index: j,
+                                      set: (e) =>
+                                        Object.assign(Object.assign({}, e), {
+                                          affects: "blockSpike",
+                                        }),
+                                    });
+                                  });
+                                },
+                              },
+                              {
+                                name: "Size",
+                                selected: "size" === t.affects,
+                                onPress: () => {
+                                  i.map((j) => {
+                                    e({
+                                      type: "setProperty",
+                                      array: "switchButtons",
+                                      index: j,
+                                      set: (e) =>
+                                        Object.assign(Object.assign({}, e), {
+                                          affects: "size",
+                                        }),
+                                    });
+                                  });
+                                },
+                              },
+                              {
+                                name: "BG Color",
+                                selected: "color" === t.affects,
+                                onPress: () => {
+                                  i.map((j) => {
+                                    e({
+                                      type: "setProperty",
+                                      array: "switchButtons",
+                                      index: j,
+                                      set: (e) =>
+                                        Object.assign(Object.assign({}, e), {
+                                          affects: "color",
+                                        }),
+                                    });
+                                  });
+                                },
+                              },
+                              {
+                                name: "Fall",
+                                selected: "falling" === t.affects,
+                                onPress: () => {
+                                  i.map((j) => {
+                                    e({
+                                      type: "setProperty",
+                                      array: "switchButtons",
+                                      index: j,
+                                      set: (e) =>
+                                        Object.assign(Object.assign({}, e), {
+                                          affects: "falling",
+                                        }),
+                                    });
+                                  });
+                                },
+                              },
+                              {
+                                name: "Gravity",
+                                selected: "gravity" === t.affects,
+                                onPress: () => {
+                                  i.map((j) => {
+                                    e({
+                                      type: "setProperty",
+                                      array: "switchButtons",
+                                      index: j,
+                                      set: (e) =>
+                                        Object.assign(Object.assign({}, e), {
+                                          affects: "gravity",
+                                        }),
+                                    });
+                                  });
+                                },
+                              },
+                            ],
+                          },
+                        ]
+                      : [];
+                  (t.affects == "gravity" &&
+                    j.push({
+                      name: "Direction",
+                      options: [
+                        {
+                          name: "Up",
+                          selected: t.gravity < 0,
+                          onPress: () => {
+                            i.map((j) => {
+                              e({
+                                type: "setProperty",
+                                array: "switchButtons",
+                                index: j,
+                                set: (e) =>
+                                  Object.assign(Object.assign({}, e), {
+                                    gravity: -1,
+                                  }),
+                              });
+                            });
+                          },
+                        },
+                        {
+                          name: "Dash",
+                          selected: t.gravity == 0,
+                          onPress: () => {
+                            i.map((j) => {
+                              e({
+                                type: "setProperty",
+                                array: "switchButtons",
+                                index: j,
+                                set: (e) =>
+                                  Object.assign(Object.assign({}, e), {
+                                    gravity: 0,
+                                  }),
+                              });
+                            });
+                          },
+                        },
+                        {
+                          name: "Jump",
+                          selected: t.gravity == 2,
+                          onPress: () => {
+                            i.map((j) => {
+                              e({
+                                type: "setProperty",
+                                array: "switchButtons",
+                                index: j,
+                                set: (e) =>
+                                  Object.assign(Object.assign({}, e), {
+                                    gravity: 2,
+                                  }),
+                              });
+                            });
+                          },
+                        },
+                        {
+                          name: "Down",
+                          selected: t.gravity == 1,
+                          onPress: () => {
+                            i.map((j) => {
+                              e({
+                                type: "setProperty",
+                                array: "switchButtons",
+                                index: j,
+                                set: (e) =>
+                                  Object.assign(Object.assign({}, e), {
+                                    gravity: 1,
+                                  }),
+                              });
+                            });
+                          },
+                        },
+                      ],
+                    }),
+                    t.affects == "falling" &&
+                      j.push({
+                        name: "Direction",
+                        options: [
+                          {
+                            name: "Up",
+                            selected: t.up,
+                            onPress: () => {
+                              i.map((j) => {
+                                e({
+                                  type: "setProperty",
+                                  array: "switchButtons",
+                                  index: j,
+                                  set: (e) =>
+                                    Object.assign(Object.assign({}, e), {
+                                      up: !e.up,
+                                    }),
+                                });
+                              });
+                            },
+                          },
+                          {
+                            name: "Down",
+                            selected: t.down,
+                            onPress: () => {
+                              i.map((j) => {
+                                e({
+                                  type: "setProperty",
+                                  array: "switchButtons",
+                                  index: j,
+                                  set: (e) =>
+                                    Object.assign(Object.assign({}, e), {
+                                      down: !e.down,
+                                    }),
+                                });
+                              });
+                            },
+                          },
+                        ],
+                      }),
+                    t.affects == "color" &&
+                      j.push({
+                        name: "Color",
+                        options: [
+                          {
+                            name: "Flash",
+                            selected: "flash" === t.color,
+                            onPress: () => {
+                              i.map((j) => {
+                                e({
+                                  type: "setProperty",
+                                  array: "switchButtons",
+                                  index: j,
+                                  set: (e) =>
+                                    Object.assign(Object.assign({}, e), {
+                                      color: "flash",
+                                    }),
+                                });
+                              });
+                            },
+                          },
+                          {
+                            name: "Red",
+                            selected: "red" === t.color,
+                            onPress: () => {
+                              i.map((j) => {
+                                e({
+                                  type: "setProperty",
+                                  array: "switchButtons",
+                                  index: j,
+                                  set: (e) =>
+                                    Object.assign(Object.assign({}, e), {
+                                      color: "red",
+                                    }),
+                                });
+                              });
+                            },
+                          },
+                          {
+                            name: "Yellow",
+                            selected: "yellow" === t.color,
+                            onPress: () => {
+                              i.map((j) => {
+                                e({
+                                  type: "setProperty",
+                                  array: "switchButtons",
+                                  index: j,
+                                  set: (e) =>
+                                    Object.assign(Object.assign({}, e), {
+                                      color: "yellow",
+                                    }),
+                                });
+                              });
+                            },
+                          },
+                          {
+                            name: "Green",
+                            selected: "green" === t.color,
+                            onPress: () => {
+                              i.map((j) => {
+                                e({
+                                  type: "setProperty",
+                                  array: "switchButtons",
+                                  index: j,
+                                  set: (e) =>
+                                    Object.assign(Object.assign({}, e), {
+                                      color: "green",
+                                    }),
+                                });
+                              });
+                            },
+                          },
+                          {
+                            name: "Default",
+                            selected: "cyan" === t.color,
+                            onPress: () => {
+                              i.map((j) => {
+                                e({
+                                  type: "setProperty",
+                                  array: "switchButtons",
+                                  index: j,
+                                  set: (e) =>
+                                    Object.assign(Object.assign({}, e), {
+                                      color: "cyan",
+                                    }),
+                                });
+                              });
+                            },
+                          },
+                          {
+                            name: "Blue",
+                            selected: "blue" === t.color,
+                            onPress: () => {
+                              i.map((j) => {
+                                e({
+                                  type: "setProperty",
+                                  array: "switchButtons",
+                                  index: j,
+                                  set: (e) =>
+                                    Object.assign(Object.assign({}, e), {
+                                      color: "blue",
+                                    }),
+                                });
+                              });
+                            },
+                          },
+                          {
+                            name: "Violet",
+                            selected: "violet" === t.color,
+                            onPress: () => {
+                              i.map((j) => {
+                                e({
+                                  type: "setProperty",
+                                  array: "switchButtons",
+                                  index: j,
+                                  set: (e) =>
+                                    Object.assign(Object.assign({}, e), {
+                                      color: "violet",
+                                    }),
+                                });
+                              });
+                            },
+                          },
+                          {
+                            name: "Pink",
+                            selected: "pink" === t.color,
+                            onPress: () => {
+                              i.map((j) => {
+                                e({
+                                  type: "setProperty",
+                                  array: "switchButtons",
+                                  index: j,
+                                  set: (e) =>
+                                    Object.assign(Object.assign({}, e), {
+                                      color: "pink",
+                                    }),
+                                });
+                              });
+                            },
+                          },
+                          {
+                            name: "Black",
+                            selected: "black" === t.color,
+                            onPress: () => {
+                              i.map((j) => {
+                                e({
+                                  type: "setProperty",
+                                  array: "switchButtons",
+                                  index: j,
+                                  set: (e) =>
+                                    Object.assign(Object.assign({}, e), {
+                                      color: "black",
+                                    }),
+                                });
+                              });
+                            },
+                          },
+                          {
+                            name: "White",
+                            selected: "white" === t.color,
+                            onPress: () => {
+                              i.map((j) => {
+                                e({
+                                  type: "setProperty",
+                                  array: "switchButtons",
+                                  index: j,
+                                  set: (e) =>
+                                    Object.assign(Object.assign({}, e), {
+                                      color: "white",
+                                    }),
+                                });
+                              });
+                            },
+                          },
+                        ],
+                      }));
+                  return j;
+                })(e, t, a, i);
+              case "block":
+                return (function (e, t, a) {
+                  if (t.init) {
+                    return [
+                      {
+                        name: "Color",
+                        options: [
+                          {
+                            name: "Red",
+                            selected: t.init == "red",
+                            onPress: () => {
+                              a.map((j) => {
+                                e({
+                                  type: "setProperty",
+                                  array: "blocks",
+                                  index: j,
+                                  set: (e) =>
+                                    Object.assign(Object.assign({}, e), {
+                                      init: "red",
+                                    }),
+                                });
+                              });
+                            },
+                          },
+                          {
+                            name: "Blue",
+                            selected: t.init == "blue",
+                            onPress: () => {
+                              a.map((j) => {
+                                e({
+                                  type: "setProperty",
+                                  array: "blocks",
+                                  index: j,
+                                  set: (e) =>
+                                    Object.assign(Object.assign({}, e), {
+                                      init: "blue",
+                                    }),
+                                });
+                              });
+                            },
+                          },
+                        ],
+                      },
+                      {
+                        name: "Trigger",
+                        options: [
+                          {
+                            name: "Music Beat",
+                            selected: t.trigger == "beat",
+                            onPress: () => {
+                              a.map((j) => {
+                                e({
+                                  type: "setProperty",
+                                  array: "blocks",
+                                  index: j,
+                                  set: (e) =>
+                                    Object.assign(Object.assign({}, e), {
+                                      trigger: "beat",
+                                    }),
+                                });
+                              });
+                            },
+                          },
+                          {
+                            name: "Jump",
+                            selected: t.trigger == "jump",
+                            onPress: () => {
+                              a.map((j) => {
+                                e({
+                                  type: "setProperty",
+                                  array: "blocks",
+                                  index: j,
+                                  set: (e) =>
+                                    Object.assign(Object.assign({}, e), {
+                                      trigger: "jump",
+                                    }),
+                                });
+                              });
+                            },
+                          },
+                          {
+                            name: "Switch",
+                            selected: t.trigger == "switch",
+                            onPress: () => {
+                              a.map((j) => {
+                                e({
+                                  type: "setProperty",
+                                  array: "blocks",
+                                  index: j,
+                                  set: (e) =>
+                                    Object.assign(Object.assign({}, e), {
+                                      trigger: "switch",
+                                    }),
+                                });
+                              });
+                            },
+                          },
+                        ],
+                      },
+                    ];
+                  }
+                  return [
+                    {
+                      name: "Type",
+                      options: [
+                        {
+                          name: "Normal",
+                          selected: !t.steel && !t.isVoid && !t.isBoss && !t.isFade,
+                          onPress: () => {
+                            a.map((j) => {
+                              e({
+                                type: "setProperty",
+                                array: "blocks",
+                                index: j,
+                                set: (e) =>
+                                  Object.assign(Object.assign({}, e), {
+                                    steel: false,
+                                    isVoid: false,
+                                    isBoss: false,
+                                    isFade: false,
+                                  }),
+                              });
+                            });
+                          },
+                        },
+                        {
+                          name: "Steel",
+                          selected: t.steel && !t.isVoid,
+                          onPress: () => {
+                            a.map((j) => {
+                              e({
+                                type: "setProperty",
+                                array: "blocks",
+                                index: j,
+                                set: (l) =>
+                                  Object.assign(Object.assign({}, l), {
+                                    steel: true,
+                                    isVoid: false,
+                                    isBoss: false,
+                                    isFade: false,
+                                  }),
+                              });
+                            });
+                          },
+                        },
+                        {
+                          name: "Void",
+                          selected: t.isVoid,
+                          onPress: () => {
+                            a.map((j) => {
+                              e({
+                                type: "setProperty",
+                                array: "blocks",
+                                index: j,
+                                set: (l) =>
+                                  Object.assign(Object.assign({}, l), {
+                                    isVoid: true,
+                                    steel: false,
+                                    isBoss: false,
+                                    isFade: false,
+                                  }),
+                              });
+                            });
+                          },
+                        },
+                        {
+                          name: "Boss",
+                          selected: t?.isBoss,
+                          onPress: () => {
+                            a.map((j) => {
+                              e({
+                                type: "setProperty",
+                                array: "blocks",
+                                index: j,
+                                set: (l) =>
+                                  Object.assign(Object.assign({}, l), {
+                                    isVoid: false,
+                                    steel: false,
+                                    isBoss: true,
+                                    isFade: false,
+                                  }),
+                              });
+                            });
+                          },
+                        },
+                        {
+                          name: "Invisible",
+                          selected: t.isFade,
+                          onPress: () => {
+                            a.map((j) => {
+                              e({
+                                type: "setProperty",
+                                array: "blocks",
+                                index: j,
+                                set: (l) =>
+                                  Object.assign(Object.assign({}, l), {
+                                    isVoid: false,
+                                    steel: false,
+                                    isBoss: false,
+                                    isFade: true,
+                                  }),
+                              });
+                            });
+                          },
+                        },
+                      ],
+                    },
+                  ];
+                })(e, t, i);
+              case "spring":
+                return (function (e, t, a) {
+                  return [
+                    {
+                      name: "Direction",
+                      options: [
+                        {
+                          name: "Up",
+                          selected: 1 === t.direction,
+                          onPress: () => {
+                            a.map((j) => {
+                              e({
+                                type: "setProperty",
+                                array: "springs",
+                                index: j,
+                                set: (e) =>
+                                  Object.assign(Object.assign({}, e), {
+                                    direction: 1,
+                                  }),
+                              });
+                            });
+                          },
+                        },
+                        {
+                          name: "Down",
+                          selected: -1 === t.direction,
+                          onPress: () => {
+                            a.map((j) => {
+                              e({
+                                type: "setProperty",
+                                array: "springs",
+                                index: j,
+                                set: (e) =>
+                                  Object.assign(Object.assign({}, e), {
+                                    direction: -1,
+                                  }),
+                              });
+                            });
+                          },
+                        },
+                      ],
+                    },
+                  ];
+                })(e, t, i);
+              case "collectible":
+                return (function (e, t, a, i) {
+                  const n = [];
+                  return (
+                    a.includes("collectible") &&
+                      n.push({
+                        name: "Coin",
+                        selected: "coin" === t.form,
+                        onPress: () => {
+                          i.map((j) => {
+                            e({
+                              type: "setProperty",
+                              array: "collectibles",
+                              index: j,
+                              set: (e) => $.changeCollectibleForm(e, "coin"),
+                            });
+                          });
+                        },
+                      }),
+                    a.includes("arrows") &&
+                      n.push({
+                        name: "Arrow",
+                        selected: "arrow" === t.form,
+                        onPress: () => {
+                          i.map((j) => {
+                            e({
+                              type: "setProperty",
+                              array: "collectibles",
+                              index: j,
+                              set: (e) => $.changeCollectibleForm(e, "arrow"),
+                            });
+                          });
+                        },
+                      }),
+                    n.length > 1 ? [{ name: "Type", options: n }] : []
+                  );
+                })(e, t, a, i);
+              case "enemy":
+                return (function (e, t, a, i) {
+                  const n = (e, t) => {
+                      const a = Ca.removeObject(t, "enemies", i);
+                      return Da.moveObjectUntilCanPlace(a, e, 1) || null;
+                    },
+                    s = [];
+                  (a.includes("flyingEnemy") &&
+                    s.push({
+                      name: "Shooter",
+                      selected: "shooter" === t.kind,
+                      onPress: () => {
+                        i.map((j) => {
+                          e({
+                            type: "setProperty",
+                            array: "enemies",
+                            index: j,
+                            set: (e, t) =>
+                              n($.changeEnemyKind(e, "shooter"), t),
+                          });
+                        });
+                      },
+                    }),
+                    (a.includes("walkingEnemy") || a.includes("giantEnemy")) &&
+                      s.push(
+                        {
+                          name: "Walker",
+                          selected: "walker" === t.kind,
+                          onPress: () => {
+                            i.map((j) => {
+                              e({
+                                type: "setProperty",
+                                array: "enemies",
+                                index: j,
+                                set: (e, t) =>
+                                  n($.changeEnemyKind(e, "walker"), t),
+                              });
+                            });
+                          },
+                        },
+                        {
+                          name: "Walker H",
+                          selected: "walkerHelmet" === t.kind,
+                          onPress: () => {
+                            i.map((j) => {
+                              e({
+                                type: "setProperty",
+                                array: "enemies",
+                                index: j,
+                                set: (e, t) =>
+                                  n($.changeEnemyKind(e, "walkerHelmet"), t),
+                              });
+                            });
+                          },
+                        },
+                      ));
+                  s.push({
+                    name: "Bomb",
+                    selected: "bomb" === t.kind,
+                    onPress: () => {
+                      i.map((j) => {
+                        e({
+                          type: "setProperty",
+                          array: "enemies",
+                          index: j,
+                          set: (e, t) => n($.changeEnemyKind(e, "bomb"), t),
+                        });
+                      });
+                    },
+                  });
+                  s.push({
+                    name: "Minion",
+                    selected: "minion" === t.kind,
+                    onPress: () => {
+                      i.map((j) => {
+                        e({
+                          type: "setProperty",
+                          array: "enemies",
+                          index: j,
+                          set: (e, t) => n($.changeEnemyKind(e, "minion"), t),
+                        });
+                      });
+                    },
+                  });
+                  s.push({
+                    name: "Fireball",
+                    selected: "fireball" === t.kind,
+                    onPress: () => {
+                      i.map((j) => {
+                        e({
+                          type: "setProperty",
+                          array: "enemies",
+                          index: j,
+                          set: (e, t) => n($.changeEnemyKind(e, "fireball"), t),
+                        });
+                      });
+                    },
+                  });
+                  const o = [{ name: "Kind", options: s }];
+                  return (
+                    "shooter" !== t.kind &&
+                      "fireball" !== t.kind &&
+                      a.includes("giantEnemy") &&
+                      a.includes("walkingEnemy") &&
+                      ("bomb" !== t.kind &&
+                        "minion" !== t.kind &&
+                        o.push({
+                          name: "Giant",
+                          options: [
+                            {
+                              name: "On",
+                              selected: t.giant,
+                              onPress: () => {
+                                i.map((j) => {
+                                  e({
+                                    type: "setProperty",
+                                    array: "enemies",
+                                    index: j,
+                                    set: (e, t) =>
+                                      n($.changeEnemyGiant(e, true), t),
+                                  });
+                                });
+                              },
+                            },
+                            {
+                              name: "Off",
+                              selected: !t.giant,
+                              onPress: () => {
+                                i.map((j) => {
+                                  e({
+                                    type: "setProperty",
+                                    array: "enemies",
+                                    index: j,
+                                    set: (e, t) =>
+                                      n($.changeEnemyGiant(e, false), t),
+                                  });
+                                });
+                              },
+                            },
+                          ],
+                        }),
+                      o.push({
+                        name: "Direction",
+                        options: [
+                          {
+                            name: "Left",
+                            selected: t.enemyDir < 0,
+                            onPress: () => {
+                              i.map((j) => {
+                                e({
+                                  type: "setProperty",
+                                  array: "enemies",
+                                  index: j,
+                                  set: (e, t) =>
+                                    Object.assign(Object.assign({}, e), {
+                                      enemyDir: -1,
+                                    }),
+                                });
+                              });
+                            },
+                          },
+                          {
+                            name: "Right",
+                            selected: t.enemyDir > 0,
+                            onPress: () => {
+                              i.map((j) => {
+                                e({
+                                  type: "setProperty",
+                                  array: "enemies",
+                                  index: j,
+                                  set: (e, t) =>
+                                    Object.assign(Object.assign({}, e), {
+                                      enemyDir: 1,
+                                    }),
+                                });
+                              });
+                            },
+                          },
+                        ],
+                      })),
+                    o.push({
+                      name: "Compatibility",
+                      options: [
+                        {
+                          name: "On",
+                          selected: t.isCompatible,
+                          onPress: () => {
+                            i.map((j) => {
+                              e({
+                                type: "setProperty",
+                                array: "enemies",
+                                index: j,
+                                set: (e, t) =>
+                                  Object.assign(Object.assign({}, e), {
+                                    isCompatible: true,
+                                  }),
+                              });
+                            });
+                          },
+                        },
+                        {
+                          name: "Off",
+                          selected: !t.isCompatible,
+                          onPress: () => {
+                            i.map((j) => {
+                              e({
+                                type: "setProperty",
+                                array: "enemies",
+                                index: j,
+                                set: (e, t) =>
+                                  Object.assign(Object.assign({}, e), {
+                                    isCompatible: false,
+                                  }),
+                              });
+                            });
+                          },
+                        },
+                      ],
+                    }),
+                    debug &&
+                      o.push({
+                        name: "Skip Missiles",
+                        options: [
+                          {
+                            name: "On",
+                            selected: t.skipMissiles,
+                            onPress: () => {
+                              i.map((j) => {
+                                e({
+                                  type: "setProperty",
+                                  array: "enemies",
+                                  index: j,
+                                  set: (e, t) =>
+                                    Object.assign(Object.assign({}, e), {
+                                      skipMissiles: true,
+                                    }),
+                                });
+                              });
+                            },
+                          },
+                          {
+                            name: "Off",
+                            selected: !t.skipMissiles,
+                            onPress: () => {
+                              i.map((j) => {
+                                e({
+                                  type: "setProperty",
+                                  array: "enemies",
+                                  index: j,
+                                  set: (e, t) =>
+                                    Object.assign(Object.assign({}, e), {
+                                      skipMissiles: false,
+                                    }),
+                                });
+                              });
+                            },
+                          },
+                        ],
+                      }),
+                    o
+                  );
+                })(e, t, a, i);
+              case "platform":
+                return (function (e, t, a, i) {
+                  const n = (e, t, a) => {
+                    const n = Ca.removeObject(t, "platforms", i);
+                    return (
+                      Da.moveObjectUntilCanPlace(
+                        n,
+                        Object.assign(Object.assign({}, e), { movement: a }),
+                      ) || null
+                    );
+                  };
+                  var s = [
+                    {
+                      name: "Music Beat",
+                      selected: "beat" === t.movementTrigger,
+                      onPress: () => {
+                        i.map((j) => {
+                          e({
+                            type: "setProperty",
+                            array: "platforms",
+                            index: j,
+                            set: (e) =>
+                              Object.assign(Object.assign({}, e), {
+                                movementTrigger: "beat",
+                              }),
+                          });
+                        });
+                      },
+                    },
+                  ];
+                  a.includes("moveOnJump") &&
+                    s.push({
+                      name: "Jump",
+                      selected: "jump" === t.movementTrigger,
+                      onPress: () => {
+                        i.map((j) => {
+                          e({
+                            type: "setProperty",
+                            array: "platforms",
+                            index: j,
+                            set: (e) =>
+                              Object.assign(Object.assign({}, e), {
+                                movementTrigger: "jump",
+                              }),
+                          });
+                        });
+                      },
+                    });
+                  a.includes("switchButton") &&
+                    s.push({
+                      name: "Switch",
+                      selected: "switch" === t.movementTrigger,
+                      onPress: () => {
+                        i.map((j) => {
+                          e({
+                            type: "setProperty",
+                            array: "platforms",
+                            index: j,
+                            set: (e) =>
+                              Object.assign(Object.assign({}, e), {
+                                movementTrigger: "switch",
+                              }),
+                          });
+                        });
+                      },
+                    });
+                  const o = [
+                    {
+                      name: "Static",
+                      selected: "static" === t.movement,
+                      onPress: () => {
+                        i.map((j) => {
+                          e({
+                            type: "setProperty",
+                            array: "platforms",
+                            index: j,
+                            set: (e, t) => n(e, t, "static"),
+                          });
+                        });
+                      },
+                    },
+                    {
+                      name: "Up-Down",
+                      selected: "upDown" === t.movement,
+                      onPress: () => {
+                        i.map((j) => {
+                          e({
+                            type: "setProperty",
+                            array: "platforms",
+                            index: j,
+                            set: (e, t) => n(e, t, "upDown"),
+                          });
+                        });
+                      },
+                    },
+                    {
+                      name: "Down-Up",
+                      selected: "downUp" === t.movement,
+                      onPress: () => {
+                        i.map((j) => {
+                          e({
+                            type: "setProperty",
+                            array: "platforms",
+                            index: j,
+                            set: (e, t) => n(e, t, "downUp"),
+                          });
+                        });
+                      },
+                    },
+                  ];
+                  (a.includes("fallingPlatform") &&
+                    o.push({
+                      name: "Falling",
+                      selected: "falling" === t.movement,
+                      onPress: () => {
+                        i.map((j) => {
+                          e({
+                            type: "setProperty",
+                            array: "platforms",
+                            index: j,
+                            set: (e, t) => n(e, t, "falling"),
+                          });
+                        });
+                      },
+                    }),
+                    a.includes("skateboard") &&
+                      o.push({
+                        name: "Rail",
+                        selected: "rail" === t.movement,
+                        onPress: () => {
+                          i.map((j) => {
+                            e({
+                              type: "setProperty",
+                              array: "platforms",
+                              index: j,
+                              set: (e, t) => n(e, t, "rail"),
+                            });
+                          });
+                        },
+                      }));
+                  const r = [{ name: "Movement", options: o }];
+                  t.movement == "falling" &&
+                    (s = [
+                      {
+                        name: "Down",
+                        selected: t?.multiplier > 0,
+                        onPress: () => {
+                          i.map((j) => {
+                            e({
+                              type: "setProperty",
+                              array: "platforms",
+                              index: j,
+                              set: (e) =>
+                                Object.assign(Object.assign({}, e), {
+                                  multiplier: Math.abs(e.multiplier),
+                                }),
+                            });
+                          });
+                        },
+                      },
+                      {
+                        name: "Up",
+                        selected: t?.multiplier < 0,
+                        onPress: () => {
+                          i.map((j) => {
+                            e({
+                              type: "setProperty",
+                              array: "platforms",
+                              index: j,
+                              set: (e) =>
+                                Object.assign(Object.assign({}, e), {
+                                  multiplier: -Math.abs(e.multiplier),
+                                }),
+                            });
+                          });
+                        },
+                      },
+                      {
+                        name: "x2",
+                        selected: Math.abs(t?.multiplier) == 2,
+                        onPress: () => {
+                          i.map((j) => {
+                            e({
+                              type: "setProperty",
+                              array: "platforms",
+                              index: j,
+                              set: (e) =>
+                                Object.assign(Object.assign({}, e), {
+                                  multiplier: Math.sign(e.multiplier) * 2,
+                                }),
+                            });
+                          });
+                        },
+                      },
+                      {
+                        name: "/2",
+                        selected: Math.abs(t?.multiplier) == 0.5,
+                        onPress: () => {
+                          i.map((j) => {
+                            e({
+                              type: "setProperty",
+                              array: "platforms",
+                              index: j,
+                              set: (e) =>
+                                Object.assign(Object.assign({}, e), {
+                                  multiplier: Math.sign(e.multiplier) / 2,
+                                }),
+                            });
+                          });
+                        },
+                      },
+                      {
+                        name: "x1",
+                        selected: Math.abs(t?.multiplier) == 1,
+                        onPress: () => {
+                          i.map((j) => {
+                            e({
+                              type: "setProperty",
+                              array: "platforms",
+                              index: j,
+                              set: (e) =>
+                                Object.assign(Object.assign({}, e), {
+                                  multiplier: Math.sign(e.multiplier),
+                                }),
+                            });
+                          });
+                        },
+                      },
+                    ]);
+                  return (
+                    ("downUp" !== t.movement &&
+                      "upDown" !== t.movement &&
+                      "falling" !== t.movement) ||
+                      r.push({ name: "Trigger", options: s }),
+                    r
+                  );
+                })(e, t, a, i);
+              case "saw":
+                return (function (e, t, a, i) {
+                  var n = [
+                      {
+                        name: "Music Beat",
+                        selected: "beat" === t.movementTrigger,
+                        onPress: () => {
+                          i.map((j) => {
+                            e({
+                              type: "setProperty",
+                              array: "saws",
+                              index: j,
+                              set: (e) =>
+                                Object.assign(Object.assign({}, e), {
+                                  movementTrigger: "beat",
+                                  shape: "rail",
+                                  width: 30,
+                                  height: 30,
+                                }),
+                            });
+                          });
+                        },
+                      },
+                    ],
+                    j = [
+                      {
+                        name: "Movement",
+                        options: [
+                          {
+                            name: "Static",
+                            selected: "static" === t.movement,
+                            onPress: () => {
+                              i.map((j) => {
+                                e({
+                                  type: "setProperty",
+                                  array: "saws",
+                                  index: j,
+                                  set: (e) =>
+                                    Object.assign(Object.assign({}, e), {
+                                      movement: "static",
+                                    }),
+                                });
+                              });
+                            },
+                          },
+                          {
+                            name: "Up-Down",
+                            selected: "upDown" === t.movement,
+                            onPress: () => {
+                              i.map((j) => {
+                                e({
+                                  type: "setProperty",
+                                  array: "saws",
+                                  index: j,
+                                  set: (e) =>
+                                    Object.assign(Object.assign({}, e), {
+                                      movement: "upDown",
+                                      shape: "rail",
+                                      width: 30,
+                                      height: 30,
+                                    }),
+                                });
+                              });
+                            },
+                          },
+                          {
+                            name: "Down-Up",
+                            selected: "downUp" === t.movement,
+                            onPress: () => {
+                              i.map((j) => {
+                                e({
+                                  type: "setProperty",
+                                  array: "saws",
+                                  index: j,
+                                  set: (e) =>
+                                    Object.assign(Object.assign({}, e), {
+                                      movement: "downUp",
+                                      shape: "rail",
+                                      width: 30,
+                                      height: 30,
+                                    }),
+                                });
+                              });
+                            },
+                          },
+                        ],
+                      },
+                    ];
+                  return (
+                    a.includes("moveOnJump") &&
+                      n.push({
+                        name: "Jump",
+                        selected: "jump" === t.movementTrigger,
+                        onPress: () => {
+                          i.map((j) => {
+                            e({
+                              type: "setProperty",
+                              array: "saws",
+                              index: j,
+                              set: (e) =>
+                                Object.assign(Object.assign({}, e), {
+                                  movementTrigger: "jump",
+                                }),
+                            });
+                          });
+                        },
+                      }),
+                    n.push({
+                      name: "Switch",
+                      selected: "switch" === t.movementTrigger,
+                      onPress: () => {
+                        i.map((j) => {
+                          e({
+                            type: "setProperty",
+                            array: "saws",
+                            index: j,
+                            set: (e) =>
+                              Object.assign(Object.assign({}, e), {
+                                movementTrigger: "switch",
+                              }),
+                          });
+                        });
+                      },
+                    }),
+                    t.movement == "falling" &&
+                      (n = [
+                        {
+                          name: "Down",
+                          selected: t?.multiplier > 0,
+                          onPress: () => {
+                            i.map((j) => {
+                              e({
+                                type: "setProperty",
+                                array: "saws",
+                                index: j,
+                                set: (e) =>
+                                  Object.assign(Object.assign({}, e), {
+                                    multiplier: Math.abs(e.multiplier),
+                                  }),
+                              });
+                            });
+                          },
+                        },
+                        {
+                          name: "Up",
+                          selected: t?.multiplier < 0,
+                          onPress: () => {
+                            i.map((j) => {
+                              e({
+                                type: "setProperty",
+                                array: "saws",
+                                index: j,
+                                set: (e) =>
+                                  Object.assign(Object.assign({}, e), {
+                                    multiplier: -Math.abs(e.multiplier),
+                                  }),
+                              });
+                            });
+                          },
+                        },
+                        {
+                          name: "x2",
+                          selected: Math.abs(t?.multiplier) == 2,
+                          onPress: () => {
+                            i.map((j) => {
+                              e({
+                                type: "setProperty",
+                                array: "saws",
+                                index: j,
+                                set: (e) =>
+                                  Object.assign(Object.assign({}, e), {
+                                    multiplier: Math.sign(e.multiplier) * 2,
+                                  }),
+                              });
+                            });
+                          },
+                        },
+                        {
+                          name: "/2",
+                          selected: Math.abs(t?.multiplier) == 0.5,
+                          onPress: () => {
+                            i.map((j) => {
+                              e({
+                                type: "setProperty",
+                                array: "saws",
+                                index: j,
+                                set: (e) =>
+                                  Object.assign(Object.assign({}, e), {
+                                    multiplier: Math.sign(e.multiplier) / 2,
+                                  }),
+                              });
+                            });
+                          },
+                        },
+                        {
+                          name: "x1",
+                          selected: Math.abs(t?.multiplier) == 1,
+                          onPress: () => {
+                            i.map((j) => {
+                              e({
+                                type: "setProperty",
+                                array: "saws",
+                                index: j,
+                                set: (e) =>
+                                  Object.assign(Object.assign({}, e), {
+                                    multiplier: Math.sign(e.multiplier) * 1,
+                                  }),
+                              });
+                            });
+                          },
+                        },
+                      ]),
+                    t.movement == "static" &&
+                      (n = [
+                        {
+                          name: "Bar",
+                          selected: t?.shape == "bar",
+                          onPress: () => {
+                            i.map((j) => {
+                              e({
+                                type: "setProperty",
+                                array: "saws",
+                                index: j,
+                                set: (e) =>
+                                  Object.assign(Object.assign({}, e), {
+                                    shape: "bar",
+                                    width: 120,
+                                    height: 20,
+                                  }),
+                              });
+                            });
+                          },
+                        },
+                        {
+                          name: "Large",
+                          selected: t?.shape == "large",
+                          onPress: () => {
+                            i.map((j) => {
+                              e({
+                                type: "setProperty",
+                                array: "saws",
+                                index: j,
+                                set: (e) =>
+                                  Object.assign(Object.assign({}, e), {
+                                    shape: "large",
+                                    width: 90,
+                                    height: 90,
+                                  }),
+                              });
+                            });
+                          },
+                        },
+                        {
+                          name: "Small",
+                          selected: t?.shape == "small",
+                          onPress: () => {
+                            i.map((j) => {
+                              e({
+                                type: "setProperty",
+                                array: "saws",
+                                index: j,
+                                set: (e) =>
+                                  Object.assign(Object.assign({}, e), {
+                                    shape: "small",
+                                    width: 60,
+                                    height: 60,
+                                  }),
+                              });
+                            });
+                          },
+                        },
+                        {
+                          name: "Default",
+                          selected: t.shape == "rail",
+                          onPress: () => {
+                            i.map((j) => {
+                              e({
+                                type: "setProperty",
+                                array: "saws",
+                                index: j,
+                                set: (e) =>
+                                  Object.assign(Object.assign({}, e), {
+                                    shape: "rail",
+                                    width: 30,
+                                    height: 30,
+                                  }),
+                              });
+                            });
+                          },
+                        },
+                      ]),
+                    j.push({
+                      name:
+                        t.movement == "falling"
+                          ? "Multiplier"
+                          : t.movement == "static"
+                            ? "Shape"
+                            : "Trigger",
+                      options: n,
+                    }),
+                    t.shape === "bar" &&
+                      j.push({
+                        name: "Offset",
+                        options: [
+                          {
+                            name: "0",
+                            selected: t.offset === 0,
+                            onPress: () => {
+                              i.map((j) => {
+                                e({
+                                  type: "setProperty",
+                                  array: "saws",
+                                  index: j,
+                                  set: (e) =>
+                                    Object.assign(Object.assign({}, e), {
+                                      offset: 0,
+                                    }),
+                                });
+                              });
+                            },
+                          },
+                          {
+                            name: "30",
+                            selected: t.offset === 30,
+                            onPress: () => {
+                              i.map((j) => {
+                                e({
+                                  type: "setProperty",
+                                  array: "saws",
+                                  index: j,
+                                  set: (e) =>
+                                    Object.assign(Object.assign({}, e), {
+                                      offset: 30,
+                                    }),
+                                });
+                              });
+                            },
+                          },
+                          {
+                            name: "60",
+                            selected: t.offset === 60,
+                            onPress: () => {
+                              i.map((j) => {
+                                e({
+                                  type: "setProperty",
+                                  array: "saws",
+                                  index: j,
+                                  set: (e) =>
+                                    Object.assign(Object.assign({}, e), {
+                                      offset: 60,
+                                    }),
+                                });
+                              });
+                            },
+                          },
+                          {
+                            name: "90",
+                            selected: t.offset === 90,
+                            onPress: () => {
+                              i.map((j) => {
+                                e({
+                                  type: "setProperty",
+                                  array: "saws",
+                                  index: j,
+                                  set: (e) =>
+                                    Object.assign(Object.assign({}, e), {
+                                      offset: 90,
+                                    }),
+                                });
+                              });
+                            },
+                          },
+                        ],
+                      }),
+                    /*debug &&
+                      j.push({
+                        name: "Skip Missiles",
+                        options: [
+                          {
+                            name: "On",
+                            selected: t.skipMissiles,
+                            onPress: () => {
+                              i.map((j) => {
+                                e({
+                                  type: "setProperty",
+                                  array: "saws",
+                                  index: j,
+                                  set: (e) =>
+                                    Object.assign(Object.assign({}, e), {
+                                      skipMissiles: true,
+                                    }),
+                                });
+                              });
+                            },
+                          },
+                          {
+                            name: "Off",
+                            selected: !t.skipMissiles,
+                            onPress: () => {
+                              i.map((j) => {
+                                e({
+                                  type: "setProperty",
+                                  array: "saws",
+                                  index: j,
+                                  set: (e) =>
+                                    Object.assign(Object.assign({}, e), {
+                                      skipMissiles: false,
+                                    }),
+                                });
+                              });
+                            },
+                          },
+                        ],
+                      }),*/
+                    j
+                  );
+                })(e, t, a, i);
+              case "directionChange":
+                return (function (e, t, a) {
+                  return [
+                    {
+                      name: "Direction",
+                      options: [
+                        {
+                          name: "Left",
+                          selected: "left" === t.direction,
+                          onPress: () => {
+                            a.map((j) => {
+                              e({
+                                type: "setProperty",
+                                array: "directionChanges",
+                                index: j,
+                                set: (e) =>
+                                  Object.assign(Object.assign({}, e), {
+                                    direction: "left",
+                                  }),
+                              });
+                            });
+                          },
+                        },
+                        {
+                          name: "Right",
+                          selected: "right" === t.direction,
+                          onPress: () => {
+                            i.map((j) => {
+                              e({
+                                type: "setProperty",
+                                array: "directionChanges",
+                                index: j,
+                                set: (e) =>
+                                  Object.assign(Object.assign({}, e), {
+                                    direction: "right",
+                                  }),
+                              });
+                            });
+                          },
+                        },
+                      ],
+                    },
+                    {
+                      name: "Usage",
+                      options: [
+                        {
+                          name: "Single-Use",
+                          selected: !t.multiUse,
+                          onPress: () => {
+                            a.map((j) => {
+                              e({
+                                type: "setProperty",
+                                array: "directionChanges",
+                                index: j,
+                                set: (e) =>
+                                  Object.assign(Object.assign({}, e), {
+                                    multiUse: false,
+                                  }),
+                              });
+                            });
+                          },
+                        },
+                        {
+                          name: "Multi-Use",
+                          selected: t.multiUse,
+                          onPress: () => {
+                            a.map((j) => {
+                              e({
+                                type: "setProperty",
+                                array: "directionChanges",
+                                index: j,
+                                set: (e) =>
+                                  Object.assign(Object.assign({}, e), {
+                                    multiUse: true,
+                                  }),
+                              });
+                            });
+                          },
+                        },
+                      ],
+                    },
+                    {
+                      name: "Fix Sync",
+                      options: [
+                        {
+                          name: "On",
+                          selected: t.fixSync,
+                          onPress: () => {
+                            a.map((j) => {
+                              e({
+                                type: "setProperty",
+                                array: "directionChanges",
+                                index: j,
+                                set: (e) =>
+                                  Object.assign(Object.assign({}, e), {
+                                    fixSync: true,
+                                  }),
+                              });
+                            });
+                          },
+                        },
+                        {
+                          name: "Off",
+                          selected: !t.fixSync,
+                          onPress: () => {
+                            a.map((j) => {
+                              e({
+                                type: "setProperty",
+                                array: "directionChanges",
+                                index: j,
+                                set: (e) =>
+                                  Object.assign(Object.assign({}, e), {
+                                    fixSync: false,
+                                  }),
+                              });
+                            });
+                          },
+                        },
+                      ],
+                    },
+                  ];
+                })(e, t, i);
+              case "speedChange":
+                return (function (e, t, a) {
+                  return [
+                    {
+                      name: "Speed",
+                      options: [
+                        {
+                          name: "Left",
+                          selected: "left" === t.direction,
+                          onPress: () => {
+                            a.map((j) => {
+                              e({
+                                type: "setProperty",
+                                array: "speedChanges",
+                                index: j,
+                                set: (e) =>
+                                  Object.assign(Object.assign({}, e), {
+                                    direction: "left",
+                                  }),
+                              });
+                            });
+                          },
+                        },
+                        {
+                          name: "Right",
+                          selected: "right" === t.direction,
+                          onPress: () => {
+                            a.map((j) => {
+                              e({
+                                type: "setProperty",
+                                array: "speedChanges",
+                                index: j,
+                                set: (e) =>
+                                  Object.assign(Object.assign({}, e), {
+                                    direction: "right",
+                                  }),
+                              });
+                            });
+                          },
+                        },
+                      ],
+                    },
+                  ];
+                })(e, t, i);
+              case "flag":
+                return (function (e, t, a) {
+                  var j = [
+                    {
+                      name: "Role",
+                      options: [
+                        {
+                          name: "Checkpoint",
+                          selected: "checkpoint" === t.role,
+                          onPress: () => {
+                            a.map((j) => {
+                              e({
+                                type: "setProperty",
+                                array: "flags",
+                                index: j,
+                                set: (e) =>
+                                  Object.assign(Object.assign({}, e), {
+                                    role: "checkpoint",
+                                  }),
+                              });
+                            });
+                          },
+                        },
+                        {
+                          name: "End of Level",
+                          selected: "endOfLevel" === t.role,
+                          onPress: () => {
+                            a.map((j) => {
+                              e({
+                                type: "setProperty",
+                                array: "flags",
+                                index: j,
+                                set: (e) =>
+                                  Object.assign(Object.assign({}, e), {
+                                    role: "endOfLevel",
+                                  }),
+                              });
+                            });
+                          },
+                        },
+                      ],
+                    },
+                  ];
+                  t.role == "checkpoint" &&
+                    (j = [
+                      ...j,
+                      {
+                        name: "Switches",
+                        options: [
+                          {
+                            name: "On",
+                            selected: t.switchesOn,
+                            onPress: () => {
+                              a.map((j) => {
+                                e({
+                                  type: "setProperty",
+                                  array: "flags",
+                                  index: j,
+                                  set: (e) =>
+                                    Object.assign(Object.assign({}, e), {
+                                      switchesOn: true,
+                                    }),
+                                });
+                              });
+                            },
+                          },
+                          {
+                            name: "Off",
+                            selected: !t.switchesOn,
+                            onPress: () => {
+                              a.map((j) => {
+                                e({
+                                  type: "setProperty",
+                                  array: "flags",
+                                  index: j,
+                                  set: (e) =>
+                                    Object.assign(Object.assign({}, e), {
+                                      switchesOn: false,
+                                    }),
+                                });
+                              });
+                            },
+                          },
+                        ],
+                      },
+                      {
+                        name: "Speed",
+                        options: [
+                          {
+                            name: "Keep",
+                            selected: t.retainSpeed,
+                            onPress: () => {
+                              a.map((j) => {
+                                e({
+                                  type: "setProperty",
+                                  array: "flags",
+                                  index: j,
+                                  set: (e) =>
+                                    Object.assign(Object.assign({}, e), {
+                                      retainSpeed: true,
+                                    }),
+                                });
+                              });
+                            },
+                          },
+                          {
+                            name: "Reset",
+                            selected: !t.retainSpeed,
+                            onPress: () => {
+                              a.map((j) => {
+                                e({
+                                  type: "setProperty",
+                                  array: "flags",
+                                  index: j,
+                                  set: (e) =>
+                                    Object.assign(Object.assign({}, e), {
+                                      retainSpeed: false,
+                                    }),
+                                });
+                              });
+                            },
+                          },
+                        ],
+                      },
+                    ]);
+                  j.push({
+                    name: "Shape",
+                    options: [
+                      {
+                        name: "Normal",
+                        selected: !t.isFlying,
+                        onPress: () => {
+                          a.map((j) => {
+                            e({
+                              type: "setProperty",
+                              array: "flags",
+                              index: j,
+                              set: (e) =>
+                                Object.assign(Object.assign({}, e), {
+                                  isFlying: false,
+                                }),
+                            });
+                          });
+                        },
+                      },
+                      {
+                        name: "Flying",
+                        selected: t.isFlying,
+                        onPress: () => {
+                          a.map((j) => {
+                            e({
+                              type: "setProperty",
+                              array: "flags",
+                              index: j,
+                              set: (e) =>
+                                Object.assign(Object.assign({}, e), {
+                                  isFlying: true,
+                                }),
+                            });
+                          });
+                        },
+                      },
+                    ],
+                  });
+                  return j;
+                })(e, t, i);
+              case "powerup":
+                return (function (e, t, a, i) {
+                  const n = [],
+                    l = [];
+                  return (
+                    a.includes("doubleJump") &&
+                      n.push({
+                        name: "Double Jump",
+                        selected: "doubleJump" === t.item,
+                        onPress: () => {
+                          i.map((j) => {
+                            e({
+                              type: "setProperty",
+                              array: "powerups",
+                              index: j,
+                              set: (e) =>
+                                Object.assign(Object.assign({}, e), {
+                                  item: "doubleJump",
+                                }),
+                            });
+                          });
+                        },
+                      }),
+                    a.includes("gun") &&
+                      n.push({
+                        name: "Gun",
+                        selected: "gun" === t.item,
+                        onPress: () => {
+                          i.map((j) => {
+                            e({
+                              type: "setProperty",
+                              array: "powerups",
+                              index: j,
+                              set: (e) =>
+                                Object.assign(Object.assign({}, e), {
+                                  item: "gun",
+                                }),
+                            });
+                          });
+                        },
+                      }),
+                    a.includes("jetpack") &&
+                      n.push({
+                        name: "Jetpack",
+                        selected: "jetpack" === t.item,
+                        onPress: () => {
+                          i.map((j) => {
+                            e({
+                              type: "setProperty",
+                              array: "powerups",
+                              index: j,
+                              set: (e) =>
+                                Object.assign(Object.assign({}, e), {
+                                  item: "jetpack",
+                                }),
+                            });
+                          });
+                        },
+                      }),
+                    a.includes("playerStacks") &&
+                      n.push({
+                        name: "Player Stack",
+                        selected: "playerStack" === t.item,
+                        onPress: () => {
+                          i.map((j) => {
+                            e({
+                              type: "setProperty",
+                              array: "powerups",
+                              index: j,
+                              set: (e) =>
+                                Object.assign(Object.assign({}, e), {
+                                  item: "playerStack",
+                                }),
+                            });
+                          });
+                        },
+                      }),
+                    a.includes("skateboard") &&
+                      n.push({
+                        name: "Skateboard",
+                        selected: "skateboard" === t.item,
+                        onPress: () => {
+                          i.map((j) => {
+                            e({
+                              type: "setProperty",
+                              array: "powerups",
+                              index: j,
+                              set: (e) =>
+                                Object.assign(Object.assign({}, e), {
+                                  item: "skateboard",
+                                }),
+                            });
+                          });
+                        },
+                      }),
+                    a.includes("punch") &&
+                      n.push({
+                        name: "Punch",
+                        selected: "punch" === t.item,
+                        onPress: () => {
+                          i.map((j) => {
+                            e({
+                              type: "setProperty",
+                              array: "powerups",
+                              index: j,
+                              set: (e) =>
+                                Object.assign(Object.assign({}, e), {
+                                  item: "punch",
+                                }),
+                            });
+                          });
+                        },
+                      }),
+                    n.push({
+                      name: "Spaceship",
+                      selected: "spaceship" === t.item,
+                      onPress: () => {
+                        i.map((j) => {
+                          e({
+                            type: "setProperty",
+                            array: "powerups",
+                            index: j,
+                            set: (e) =>
+                              Object.assign(Object.assign({}, e), {
+                                item: "spaceship",
+                              }),
+                          });
+                        });
+                      },
+                    }),
+                    /*n.push({
+                        name: "Drill",
+                        selected: "drill" === t.item,
+                        onPress: () => {
+                          i.map((j) => {
+                            e({
+                              type: "setProperty",
+                              array: "powerups",
+                              index: j,
+                              set: (e) =>
+                                Object.assign(Object.assign({}, e), {
+                                  item: "drill",
+                                }),
+                            });
+                          });
+                        },
+                      }), */
+                    /* n.push({
+                        name: "Ghost",
+                        selected: "ghost" === t.item,
+                        onPress: () => {
+                          i.map((j) => {
+                            e({
+                              type: "setProperty",
+                              array: "powerups",
+                              index: j,
+                              set: (e) =>
+                                Object.assign(Object.assign({}, e), {
+                                  item: "ghost",
+                                }),
+                            });
+                          });
+                        },
+                      }),*/
+                    ["playerStack", "punch", "skateboard"].includes(t.item) &&
+                      l.push({
+                        name: "On",
+                        selected: t.compatible,
+                        onPress: () => {
+                          i.map((j) => {
+                            e({
+                              type: "setProperty",
+                              array: "powerups",
+                              index: j,
+                              set: (e) =>
+                                Object.assign(Object.assign({}, e), {
+                                  compatible: true,
+                                }),
+                            });
+                          });
+                        },
+                      }),
+                    ["playerStack", "punch", "skateboard"].includes(t.item) &&
+                      l.push({
+                        name: "Off",
+                        selected: !t.compatible,
+                        onPress: () => {
+                          i.map((j) => {
+                            e({
+                              type: "setProperty",
+                              array: "powerups",
+                              index: j,
+                              set: (e) =>
+                                Object.assign(Object.assign({}, e), {
+                                  compatible: false,
+                                }),
+                            });
+                          });
+                        },
+                      }),
+                    l.length > 0
+                      ? [
+                          { name: "Item", options: n },
+                          {
+                            name: "Override",
+                            options: [
+                              {
+                                name: "On",
+                                selected: t.override,
+                                onPress: () => {
+                                  i.map((j) => {
+                                    e({
+                                      type: "setProperty",
+                                      array: "powerups",
+                                      index: j,
+                                      set: (e) =>
+                                        Object.assign(Object.assign({}, e), {
+                                          override: true,
+                                        }),
+                                    });
+                                  });
+                                },
+                              },
+                              {
+                                name: "Off",
+                                selected: !t.override,
+                                onPress: () => {
+                                  i.map((j) => {
+                                    e({
+                                      type: "setProperty",
+                                      array: "powerups",
+                                      index: j,
+                                      set: (e) =>
+                                        Object.assign(Object.assign({}, e), {
+                                          override: false,
+                                        }),
+                                    });
+                                  });
+                                },
+                              },
+                            ],
+                          },
+                          { name: "Compatible? (EXPERIMENTAL)", options: l },
+                        ]
+                      : [
+                          { name: "Item", options: n },
+                          {
+                            name: "Override",
+                            options: [
+                              {
+                                name: "On",
+                                selected: t.override,
+                                onPress: () => {
+                                  i.map((j) => {
+                                    e({
+                                      type: "setProperty",
+                                      array: "powerups",
+                                      index: j,
+                                      set: (e) =>
+                                        Object.assign(Object.assign({}, e), {
+                                          override: true,
+                                        }),
+                                    });
+                                  });
+                                },
+                              },
+                              {
+                                name: "Off",
+                                selected: !t.override,
+                                onPress: () => {
+                                  i.map((j) => {
+                                    e({
+                                      type: "setProperty",
+                                      array: "powerups",
+                                      index: j,
+                                      set: (e) =>
+                                        Object.assign(Object.assign({}, e), {
+                                          override: false,
+                                        }),
+                                    });
+                                  });
+                                },
+                              },
+                            ],
+                          },
+                        ]
+                  );
+                })(e, t, a, i);
+              case "switchPlatform":
+                return (function (e, t, a) {
+                  return [
+                    {
+                      name: "Init Position",
+                      options: [
+                        {
+                          name: "Up",
+                          selected: "up" === t.initPosition,
+                          onPress: () => {
+                            i.map((j) => {
+                              e({
+                                type: "setProperty",
+                                array: "switchPlatforms",
+                                index: j,
+                                set: (e) =>
+                                  Object.assign(Object.assign({}, e), {
+                                    initPosition: "up",
+                                    rotation: -90 + t.direction,
+                                  }),
+                              });
+                            });
+                          },
+                        },
+                        {
+                          name: "Right",
+                          selected: "right" === t.initPosition,
+                          onPress: () => {
+                            i.map((j) => {
+                              e({
+                                type: "setProperty",
+                                array: "switchPlatforms",
+                                index: j,
+                                set: (e) =>
+                                  Object.assign(Object.assign({}, e), {
+                                    initPosition: "right",
+                                    rotation: 0 + t.direction,
+                                  }),
+                              });
+                            });
+                          },
+                        },
+                      ],
+                    },
+                    {
+                      name: "Direction",
+                      options: [
+                        {
+                          name: "Up",
+                          selected: 0 === t.direction,
+                          onPress: () => {
+                            i.map((j) => {
+                              e({
+                                type: "setProperty",
+                                array: "switchPlatforms",
+                                index: j,
+                                set: (e) =>
+                                  setSwitchRotation(Object.assign(Object.assign({}, e), {
+                                    direction: 0,
+                                  }))
+                              });
+                            });
+                          },
+                        },
+                        {
+                          name: "Left",
+                          selected: 270 === t.direction,
+                          onPress: () => {
+                            i.map((j) => {
+                              e({
+                                type: "setProperty",
+                                array: "switchPlatforms",
+                                index: j,
+                                set: (e) =>
+                                  setSwitchRotation(Object.assign(Object.assign({}, e), {
+                                    direction: 270,
+                                  }))
+                              });
+                            });
+                          },
+                        },
+                        {
+                          name: "Down",
+                          selected: 180 === t.direction,
+                          onPress: () => {
+                            i.map((j) => {
+                              e({
+                                type: "setProperty",
+                                array: "switchPlatforms",
+                                index: j,
+                                set: (e) =>
+                                  setSwitchRotation(Object.assign(Object.assign({}, e), {
+                                    direction: 180,
+                                  }))
+                              });
+                            });
+                          },
+                        },
+                        {
+                          name: "Right",
+                          selected: 90 === t.direction,
+                          onPress: () => {
+                            i.map((j) => {
+                              e({
+                                type: "setProperty",
+                                array: "switchPlatforms",
+                                index: j,
+                                set: (e) =>
+                                  setSwitchRotation(Object.assign(Object.assign({}, e), {
+                                    direction: 90,
+                                  }))
+                              });
+                            });
+                          },
+                        },
+>>>>>>> 8740d7ccb287389ed55f3dccfd4159210feb279a
                       ],
                     },
                     {
@@ -43915,18 +46409,597 @@ var version = "v1.17.2";
                   (isDown = false),
                   (U.justDownInputTimer = 0));
               }
-            } else if (
-              U.playerPowerups.some((e) => e.item === "spaceship")
-            ) {
-            } else {
-              if (U.dashing) {
-                U.dashing &&
-                  e &&
-                  ((U.dashing = false),
-                    (U.boosterDebug && (U.boosterDebug.jumpIndicators.push({ x: U.playerX, y: U.playerY, inAir: true }))),
-                    (L.blockJumpUntilReleased = true),
-                    (isDown = false),
-                    (U.justDownInputTimer = 0));
+            );
+          },
+          hl = {
+            songs: {
+              dragonfly: {
+                name: "Dragonfly",
+                author: "Nitro Fun",
+                fileName: "audio/tracks/nitro-fun-dragonfly.mp3",
+                bpm: 130,
+                label: "Wolf Beats",
+                isBonusSong: false,
+              },
+              stardust: {
+                name: "Stardust",
+                author: "Geoxor",
+                fileName: "audio/tracks/geoxor-stardust.mp3",
+                bpm: 110,
+                isBonusSong: false,
+              },
+              solarWind: {
+                name: "Solar Wind",
+                author: "Jumper",
+                fileName: "audio/tracks/jumper-solar-wind.mp3",
+                bpm: 130,
+              },
+              solace: {
+                name: "Solace",
+                author: "Avenza",
+                fileName: "audio/tracks/avenza-solace.mp3",
+                bpm: 115,
+                isBonusSong: false,
+              },
+              solarAbyss: {
+                name: "Solar Abyss",
+                author: "Lchvasse",
+                fileName: "audio/tracks/lchvasse-solar-abyss.mp3",
+                bpm: 150,
+                isBonusSong: false,
+              },
+              rockinThatBass: {
+                name: "Rockin' That Bass",
+                author: "MrCoolTrix",
+                bpm: 130,
+                fileName: "audio/tracks/mrcooltrix-rockin-that-bass.mp3"
+              },
+              thinkDifferent: {
+                name: "Think Different",
+                author: "Panda Eyes & Gabriel Guardian",
+                fileName: "audio/tracks/panda-eyes-think-different.mp3",
+                bpm: 150,
+                isBonusSong: false,
+              },
+              indestructable: {
+                name: "Indestructable",
+                author: "Aaro",
+                fileName: "audio/tracks/aaro-indestructable.mp3",
+                bpm: 128,
+                label: "Tasty",
+                isBonusSong: false,
+              },
+              glitchedOut: {
+                name: "Glitched Out",
+                author: "FantomenK",
+                fileName: "audio/tracks/fantomenk-glitched-out.mp3  ",
+                bpm: 140,
+              },
+              eightBitAdventure: {
+                name: "8 Bit Adventure",
+                author: "AdhesiveWombat",
+                fileName: "audio/tracks/adhesive-wombat-8-bit-adventure.mp3",
+                bpm: 153,
+                isBonusSong: false,
+              },
+              eightBitShuffle: {
+                name: "8 Bit Shuffle",
+                author: "Inova",
+                fileName: "audio/tracks/inova-8-bit-shuffle.mp3",
+                bpm: 133,
+                label: "Argofox",
+                isBonusSong: false,
+              },
+              octane: {
+                name: "Octane",
+                author: "Inova",
+                fileName: "audio/tracks/inova-octane.mp3",
+                bpm: 125,
+                label: "Argofox",
+                isBonusSong: false,
+              },
+              milkyWays: {
+                name: "Milky Ways",
+                author: "Bossfight",
+                fileName: "audio/tracks/bossfight-milky-ways.mp3",
+                bpm: 183,
+                isBonusSong: false,
+              },
+              darkSheep: {
+                name: "Dark Sheep",
+                author: "Chroma",
+                fileName: "audio/tracks/chroma-dark-sheep.mp3",
+                bpm: 177,
+                isBonusSong: false,
+              },
+              daydreamer: {
+                name: "Daydreamer",
+                author: "Meganeko",
+                fileName: "audio/tracks/meganeko-daydreamer.mp3",
+                bpm: 135,
+                isBonusSong: false,
+              },
+              breathe: {
+                name: "Breathe",
+                author: "meganeko & RoccoW",
+                fileName: "audio/tracks/meganeko-breathe.mp3",
+                bpm: 155,
+                isBonusSong: false,
+              },
+              criticalHitExtended: {
+                name: "Critical Hit (Extended Cut)",
+                author: "MDK",
+                fileName: "audio/tracks/mdk-critical-hit-extended.mp3",
+                bpm: 130,
+              },
+              criticalHit: {
+                name: "Critical Hit",
+                author: "MDK",
+                fileName: "audio/tracks/mdk-critical-hit.mp3",
+                bpm: 130,
+                isBonusSong: false,
+              },
+              silverdust: {
+                name: "Silverdust",
+                author: "Geoxor",
+                fileName: "audio/tracks/geoxor-silverdust.mp3",
+                bpm: 140,
+              },
+              lighthouse: {
+                name: "Lighthouse",
+                author: "Ghost'n'Ghost",
+                fileName: "audio/tracks/ghost-n-ghost-lighthouse.mp3",
+                bpm: 128,
+                label: "Argofox",
+                isBonusSong: false,
+              },
+              frontier: {
+                name: "Frontier",
+                author: "Doctor Vox",
+                fileName: "audio/tracks/doctor-vox-frontier.mp3",
+                bpm: 124,
+                label: "Argofox",
+                isBonusSong: false,
+              },
+              toe3: {
+                name: "Theory Of Everything 3",
+                author: "dj-Nate",
+                fileName: "audio/tracks/dj-nate-theory-of-everything-3.mp3",
+                bpm: 140,
+                isBonusSong: true,
+              },
+              polymorph: {
+                name: "Polymorph",
+                author: "The Brig",
+                fileName: "audio/tracks/the-brig-polymorph.mp3",
+                bpm: 150,
+                isBonusSong: false,
+              },
+              accelerated: {
+                name: "Accelerated",
+                author: "Miami Nights 1984",
+                fileName: "audio/tracks/miami-nights-1984-accelerated.mp3",
+                bpm: 130,
+                isBonusSong: false,
+              },
+              skyFracture: {
+                name: "Sky Fracture",
+                author: "Getsix",
+                fileName: "audio/tracks/getsix-sky-fracture.mp3",
+                bpm: 176,
+                isBonusSong: false,
+              },
+              truecolors: {
+                name: "True Colors",
+                author: "Geoxor",
+                fileName: "audio/tracks/geoxor-true-colors.mp3",
+                bpm: 128,
+                isBonusSong: true,
+              },
+              blythe: {
+                name: "Blythe",
+                author: "Aika (feat. TOFIE)",
+                fileName: "audio/tracks/aika-blythe.mp3",
+                bpm: 105,
+                isBonusSong: false,
+              },
+              color: {
+                name: "Color",
+                author: "Amidst",
+                fileName: "audio/tracks/amidst-color.mp3",
+                bpm: 130,
+              },
+              awake: {
+                name: "Awake",
+                author: "Amidst",
+                fileName: "audio/tracks/amidst-awake.mp3",
+                bpm: 130,
+                label: "Argofox",
+                isBonusSong: false,
+              },
+              coincidence: {
+                name: "Coincidence",
+                author: "3b",
+                fileName: "audio/tracks/3b-coincidence.mp3",
+                bpm: 124,
+                label: "Wolf Beats",
+                isBonusSong: false,
+              },
+              rattlesnake: {
+                name: "Rattlesnake",
+                author: "Evilwave & Teminite",
+                fileName: "audio/tracks/evilwave-rattlesnake.mp3",
+                bpm: 150,
+                isBonusSong: false,
+              },
+              mutant: {
+                name: "Mutant",
+                author: "Evilwave & Teminite (ft. Prey For Me)",
+                fileName: "audio/tracks/evilwave-mutant.mp3",
+                bpm: 150,
+                isBonusSong: false,
+              },
+              overdrive: {
+                name: "Overdrive",
+                author: "Far Out",
+                fileName: "audio/tracks/far-out-overdrive.mp3",
+                bpm: 172,
+                isBonusSong: false,
+              },
+              // official order: red shift, fire aura, heaven, minds of mad, phobos 
+              redShift: {
+                name: "Red Shift",
+                author: "Cubed",
+                fileName: "audio/tracks/cubed-red-shift.mp3",
+                bpm: 150,
+                isBonusSong: true,
+              },
+              fireAura: {
+                name: "Fire Aura",
+                author: "Kid2Will",
+                fileName: "audio/tracks/kid2will-fire-aura.mp3",
+                bpm: 180,
+                isBonusSong: true,
+              },
+              robotLanguage: {
+                name: "Robot Language",
+                author: "meganeko",
+                bpm: 132,
+                fileName: "audio/tracks/meganeko-robot-language.mp3",
+              },
+              paradiseOnE: {
+                name: "Paradise On E",
+                author: "B0UNC3 (apimusic remix)",
+                bpm: 148,
+                fileName: "audio/tracks/bounce-paradise-on-e.mp3"
+              },
+              heaven: {
+                name: "Heaven",
+                author: "EnV",
+                fileName: "audio/tracks/env-heaven.mp3",
+                bpm: 150,
+                isBonusSong: true,
+              },
+              mindsOfTheMad: {
+                name: "Minds Of The Mad",
+                author: "Exilelord",
+                fileName: "audio/tracks/exilelord-minds-of-the-mad.mp3",
+                bpm: 150,
+              },
+              phobos: {
+                name: "Phobos",
+                author: "Solkraig",
+                bpm: 140,
+                fileName: "audio/tracks/solkraig-phobos.mp3"
+              },
+              cloud9: {
+                name: "Cloud 9",
+                author: "Valesco",
+                fileName: "audio/tracks/valesco-cloud-9.mp3",
+                bpm: 140,
+                label: "Argofox",
+                isBonusSong: true,
+              },
+              virtual: {
+                name: "Virtual",
+                author: "Geoxor",
+                fileName: "audio/tracks/geoxor-virtual.mp3",
+                bpm: 128,
+                isBonusSong: true,
+              },
+              aura: {
+                name: "Aura",
+                author: "Creo",
+                fileName: "audio/tracks/creo-aura.mp3",
+                bpm: 128,
+                isBonusSong: true,
+              },
+              lastTile: {
+                name: "Last Tile",
+                author: "Kommisar",
+                bpm: 150,
+                fileName: "audio/tracks/kommisar-last-tile.mp3",
+              },
+              coolFriends: {
+                name: "Cool Friends",
+                author: "Silva Hound (Murtagh & Veschell Remix)",
+                fileName: "audio/tracks/silva-hound-cool-friends.mp3",
+                bpm: 115,
+                isBonusSong: true,
+              },
+
+              nacreousSnowmelt: {
+                name: "Nacreous Snowmelt",
+                author: "Camellia",
+                fileName: "audio/tracks/camellia-nacreous-snowmelt.mp3",
+                bpm: 201,
+                isBonusSong: true,
+              },
+              rummy: {
+                name: "Rum n' Bass",
+                author: "BoomKitty",
+                fileName: "audio/tracks/boomkitty-rum-and-bass.mp3",
+                bpm: 132,
+                isBonusSong: true,
+              },
+
+              forYou: {
+                name: "For You (+ Waterfall mashup)",
+                author: "ColBreakz & EXODIE, SkybreakEDM",
+                fileName: "audio/tracks/colbreakz-for-you.mp3",
+                bpm: 145,
+                isBonusSong: true,
+              },
+              zenith: {
+                name: "Nana",
+                author: "Geoxor",
+                fileName: "audio/tracks/geoxor-nana.mp3",
+                bpm: 128,
+              },
+
+              chaozFantasy: {
+                name: "Chaoz Fantasy",
+                author: "ParagonX9",
+                fileName: "audio/tracks/paragonx9-chaoz-fantasy.mp3",
+                bpm: 162,
+                isBonusSong: true,
+              },
+              phazd: {
+                name: "Phazd",
+                author: "tobycreed",
+                fileName: "audio/tracks/tobycreed-phazd.mp3",
+                bpm: 165,
+                isBonusSong: true,
+              },
+              finalTheory: {
+                name: "Final Theory",
+                author: "dj-Nate",
+                fileName: "audio/tracks/dj-nate-final-theory.mp3",
+                bpm: 132,
+                isBonusSong: false,
+              },
+              piratemanners: {
+                name: "Pirate Manners",
+                author: "Bossfight",
+                fileName: "audio/tracks/bossfight-pirate-manners.mp3",
+                bpm: 116,
+                isBonusSong: true,
+              },
+              
+
+              orientalSwing: {
+                name: "Oriental Swing",
+                author: "Xe & cYsmix",
+                fileName: "audio/tracks/xe-cysmix-oriental-swing.mp3",
+                bpm: 125,
+                isBonusSong: false,
+              },
+              clutterfunk: {
+                name: "Clutterfunk",
+                author: "Waterflame",
+                fileName: "audio/tracks/waterflame-clutterfunk.mp3",
+                bpm: 140,
+              },
+              soulless2: {
+                name: "Mechanical Machine (Soulless 2)",
+                author: "Exilelord",
+                fileName: "audio/tracks/exilelord-mechanical-machine.mp3",
+                bpm: 125,
+                length: "5 mins",
+                isBonusSong: true,
+              },
+              raceAroundTheWorld: {
+                name: "Race Around The World",
+                author: "Waterflame",
+                fileName: "audio/tracks/waterflame-race-around-the-world.mp3",
+                bpm: 180,
+              },
+              machina: {
+                name: "Machina",
+                author: "Dex Arson",
+                fileName: "audio/tracks/dex-arson-machina.mp3",
+                bpm: 125,
+              },
+              
+              soulless4: {
+                name: "Soulless 4",
+                author: "Exilelord",
+                fileName: "audio/tracks/exilelord-soulless-4.mp3",
+                bpm: 125,
+                length: "12 mins",
+                isBonusSong: true,
+              },
+              superUltra: {
+                name: "Super Ultra",
+                author: "MDK",
+                fileName: "audio/tracks/mdk-super-ultra.mp3",
+                bpm: 172,
+                isBonusSong: false,
+              },
+              funkyPunky: {
+                name: "Funky Punky",
+                author: "Grge & Antian Rose",
+                fileName: "audio/tracks/george-antian-rose-funky-punky.mp3",
+                bpm: 128,
+              },
+              octaneExtended: {
+                name: "Octane (Full ver.)",
+                author: "Inova",
+                fileName: "audio/tracks/inova-octane-extended.mp3",
+                bpm: 125,
+                label: "Argofox",
+              },
+              electrodynamix: {
+                name: "Electrodynamix",
+                author: "dj-Nate",
+                fileName: "audio/tracks/dj-nate-electrodynamix.mp3",
+                bpm: 127,
+              },
+              skyFractureExtended: {
+                name: "Sky Fracture (extended)",
+                author: "Getsix",
+                fileName: "audio/tracks/getsix-sky-fracture-extended.mp3",
+                bpm: 176,
+              },
+              plummet: {
+                name: "Plümmet",
+                author: "Onefin & Stardew",
+                fileName: "audio/tracks/onefin-stardew-plummet.mp3",
+                bpm: 134,
+              },
+              
+              hellidox: {
+                name: "Hellidox",
+                author: "Exilelord",
+                bpm: 200,
+                fileName: "audio/tracks/exilelord-hellidox.mp3",
+              },
+              jackpot: {
+                name: "Jackpot",
+                author: "TheFatRat",
+                bpm: 103,
+                fileName: "audio/tracks/the-fat-rat-jackpot.mp3",
+              },
+              carnival: {
+                name: "Carnival",
+                author: "DJVI",
+                bpm: 128,
+                fileName: "audio/tracks/djvi-carnival.mp3",
+              },
+              
+              dryOut: {
+                name: "Dry Out",
+                author: "DJVI",
+                bpm: 145,
+                fileName: "audio/tracks/djvi-dry-out.mp3",
+              },
+              carnivores: {
+                name: "Carnivores",
+                author: "Creo",
+                bpm: 120,
+                fileName: "audio/tracks/creo-carnivores.mp3",
+              },
+              
+            },
+            getSnippetName: (e) => e.replace("audio/tracks", "audio/snippets"),
+          },
+          pl = 2.5 * G.jumpDistance,
+          gl = G.getJumpFrames(130);
+        function ml(e, t, a, data1, data2) {
+          switch (e) {
+            case "thinBullet":
+              return {
+                type: "thinBullet",
+                x: t,
+                y: a,
+                width: 22,
+                height: 8,
+                speedX: -3,
+                speedY: 0,
+                gradY: 0,
+                destroyed: false,
+              };
+            case "missile":
+              return {
+                type: "missile",
+                x: t,
+                y: a,
+                width: 33,
+                height: 15,
+                speedX: -0.5,
+                speedY: 0 === data1 ? 3 : -3,
+                gradY: 0,
+                destroyed: false,
+              };
+            case "cannonbomb":
+              return {
+                type: "cannonbomb",
+                x: t,
+                y: a,
+                width: 30,
+                height: 30,
+                speedX: data2 || 0,
+                speedY: data1 || 0,
+                gradY: -0.4,
+                destroyed: false,
+              };
+            case "bomb":
+              return {
+                type: "bomb",
+                x: t,
+                y: a,
+                width: 30,
+                height: 30,
+                speedX: -3,
+                speedY: 0,
+                gradY: -0.4,
+                destroyed: false,
+              };
+            case "bulletHell":
+            case "bulletHellBig":
+              const n = 30 * data1,
+                s = B.toRad(30 + n),
+                o = "bulletHell" === e ? 1.8 : 7,
+                r = "bulletHell" === e ? 3 : 15;
+              return {
+                type: "bulletHell",
+                x: t,
+                y: a,
+                width: r,
+                height: r,
+                speedX: ("bulletHell" === e ? 4 : -1) - 2 * Math.sin(s),
+                speedY: Math.cos(s) * o,
+                gradY: 0,
+                destroyed: false,
+              };
+            case "laser":
+              return {
+                type: "laser",
+                x: t,
+                y: a,
+                width: 600,
+                height: 100,
+                speedX: 0,
+                speedY: 0,
+                gradY: 0,
+                destroyed: false,
+              };
+          }
+        }
+        function fl(e, df, crashed, playerX) {
+          if ("laser" === e.type) return;
+          if (
+            ((e.y += e.speedY * df),
+            (e.speedY += e.gradY * df),
+            "bomb" === e.type || "cannonbomb" === e.type)
+          ) {
+            const t = et.initialPosition.y - 15 + e.height / 2;
+            if (e.y < t && !(e.speedY > 0)) {
+              if ("cannonbomb" === e.type) {
+                e.destroyed = true;
+                e.speedY = 0;
+                e.y = t;
+>>>>>>> 8740d7ccb287389ed55f3dccfd4159210feb279a
               } else {
                 U.jumping ||
                   0 !== U.playerGradY ||
@@ -47202,332 +50275,333 @@ var version = "v1.17.2";
             levelName: "Solar Abyss",
             levelFileName: "solar-abyss",
             song: hl.songs.solarAbyss,
-
-            unlockedByIndex: 2,
-            x: 150,
-            y: 100,
-            pathToLevel: [
-              [120, 10],
-              [140, 45],
-            ],
-            maxFrames: 9738,
-            difficulty: 8,
-          },
-          {
-            levelName: "Indestructable",
-            levelFileName: "indestructable",
-            song: hl.songs.indestructable,
-            unlockedByIndex: null, //2,
-            x: 250,
-            y: 20,
-            pathToLevel: [
-              [150, -20],
-              [220, 20],
-            ],
-            maxFrames: 5647,
-            difficulty: 4,
-            boss: getRobotBoss(),
-          },
-        ],
-        Bl = [
-          {
-            levelName: "Glitched Out",
-            levelFileName: "glitched-out",
-            song: hl.songs.glitchedOut,
-            unlockedByIndex: null,
-            x: -250,
-            y: 30,
-            pathToLevel: [],
-            maxFrames: 10643,
-            difficulty: 4,
-          },
-          {
-            levelName: "8 Bit Shuffle",
-            levelFileName: "8-bit-shuffle",
-            song: hl.songs.eightBitShuffle,
-            unlockedByIndex: 0,
-            x: -50,
-            y: 50,
-            pathToLevel: [
-              [-220, 30],
-              [-80, 50],
-            ],
-            maxFrames: 8407,
-            difficulty: 4,
-          },
-          {
-            levelName: "Milky Ways",
-            levelFileName: "milky-ways",
-            song: hl.songs.milkyWays,
-            unlockedByIndex: 1,
-            x: -110,
-            y: -100,
-            pathToLevel: [
-              [-60, -10],
-              [-80, -70],
-            ],
-            maxFrames: 9638,
-            difficulty: 9,
-          },
-          {
-            levelName: "Daydreamer",
-            levelFileName: "daydreamer",
-            song: hl.songs.daydreamer,
-            unlockedByIndex: 1,
-            x: 90,
-            y: -20,
-            pathToLevel: [
-              [-20, 50],
-              [60, -20],
-            ],
-            maxFrames: 7477,
-            difficulty: 5,
-            comingSoon: true,
-          },
-          {
-            levelName: "Critical Hit (Extended)",
-            levelFileName: "critical-hit",
-            song: hl.songs.criticalHitExtended,
-            unlockedByIndex: 3,
-            x: 250,
-            y: 50,
-            pathToLevel: [
-              [120, 0],
-              [220, 50],
-            ],
-            maxFrames: 5343,
-            difficulty: 5,
-            boss: getPixelBoss(),
-            comingSoon: true,
-          },
-        ],
-        Fl = [
-          {
-            levelName: "Silverdust",
-            levelFileName: "silverdust",
-            song: hl.songs.silverdust,
-            unlockedByIndex: null,
-            x: -240,
-            y: -30,
-            pathToLevel: [],
-            maxFrames: 7986,
-            difficulty: 2,
-          },
-          {
-            levelName: "Frontier",
-            levelFileName: "frontier",
-            song: hl.songs.frontier,
-            unlockedByIndex: 0,
-            x: -140,
-            y: 40,
-            pathToLevel: [
-              [-220, 0],
-              [-180, 40],
-            ],
-            maxFrames: 9377,
-            difficulty: 5,
-          },
-          {
-            levelName: "Theory Of Everything 3",
-            levelFileName: "toeiii",
-            song: hl.songs.toe3,
-            unlockedByIndex: 1,
-            x: -60,
-            y: -100,
-            pathToLevel: [
-              [-120, -20],
-              [-100, -80],
-            ],
-            maxFrames: 9156,
-            difficulty: 8,
-          },
-          {
-            levelName: "Accelerated",
-            levelFileName: "accelerated",
-            song: hl.songs.accelerated,
-            unlockedByIndex: 1,
-            x: 110,
-            y: 10,
-            pathToLevel: [
-              [-100, 40],
-              [70, 10],
-            ],
-            maxFrames: 7530,
-            difficulty: 2,
-          },
-          {
-            levelName: "Sky Fracture",
-            levelFileName: "sky-fracture",
-            song: hl.songs.skyFracture,
-            unlockedByIndex: 3,
-            x: 250,
-            y: 50,
-            pathToLevel: [
-              [150, 10],
-              [220, 40],
-            ],
-            maxFrames: 5460,
-            difficulty: 5,
-            boss: getFlyingBoss(),
-          },
-        ],
-        Yl = [
-          {
-            levelName: "True Colors",
-            levelFileName: "true-colors",
-            song: hl.songs.truecolors,
-            unlockedByIndex: null,
-            x: -240,
-            y: 30,
-            pathToLevel: [],
-            maxFrames: 10420,
-            difficulty: 3,
-          },
-          {
-            levelName: "Color",
-            levelFileName: "color",
-            song: hl.songs.color,
-            unlockedByIndex: 0,
-            x: -100,
-            y: 0,
-            pathToLevel: [
-              [-220, 30],
-              [-130, 0],
-            ],
-            maxFrames: 10111,
-            difficulty: 4,
-          },
-          {
-            levelName: "Coincidence",
-            levelFileName: "coincidence",
-            song: hl.songs.coincidence,
-            unlockedByIndex: 1,
-            x: 120,
-            y: 60,
-            pathToLevel: [
-              [-70, 0],
-              [90, 50],
-            ],
-            maxFrames: 8685,
-            difficulty: 5,
-          },
-          {
-            levelName: "Mutant",
-            levelFileName: "mutant",
-            song: hl.songs.mutant,
-            unlockedByIndex: 2,
-            x: 140,
-            y: -120,
-            pathToLevel: [
-              [120, 5],
-              [130, -20],
-            ],
-            maxFrames: 11714,
-            difficulty: 10,
-          },
-          {
-            levelName: "Overdrive",
-            levelFileName: "overdrive",
-            song: hl.songs.overdrive,
-            unlockedByIndex: null, //2,
-            x: 250,
-            y: 0,
-            pathToLevel: [
-              [160, 50],
-              [220, 0],
-            ],
-            maxFrames: 5597,
-            difficulty: 6,
-            boss: getDemonBoss(),
-          },
-        ],
-        world5levels = [
-          {
-            levelName: "Fire Aura 2",
-            levelFileName: "fire-aura",
-            author: "Alfredo Gamer",
-            song: hl.songs.fireAura,
-            unlockedByIndex: null,
-            x: -240,
-            y: 20,
-            pathToLevel: [],
-            maxFrames: 9877,
-            difficulty: 7,
-          },
-          {
-            levelName: "Heaven 2",
-            levelFileName: "heaven",
-            song: hl.songs.heaven,
-            unlockedByIndex: 0,
-            x: -100,
-            y: -30,
-            pathToLevel: [],
-            maxFrames: 9877,
-            difficulty: 7,
-          },
-        ],
-        Ul = [
-          /*{
-            levelName: "Cloud 9",
-            levelFileName: "cloud-9",
-            song: hl.songs.cloud9,
-            unlockedByIndex: null,
-            x: 0,
-            y: 0,
-            pathToLevel: [],
-            maxFrames: 9070,
-            difficulty: 5,
-          },*/
-          {
-            levelName: "Virtual",
-            levelFileName: "virtual",
-            song: hl.songs.virtual,
-            unlockedByIndex: null,
-            x: 0,
-            y: 0,
-            pathToLevel: [],
-            maxFrames: 9637,
-            difficulty: 7,
-          },
-          {
-            levelName: "Normal Polymorph",
-            levelFileName: "polymorph",
-            author: "Fluke Games, d016",
-            song: hl.songs.polymorph,
-            unlockedByIndex: null,
-            x: 0,
-            y: 0,
-            pathToLevel: [],
-            maxFrames: 8782,
-            difficulty: 8,
-          },
-          /*{
-            levelName: "For You",
-            levelFileName: "for-you",
-            author: "Fluke Games",
-            song: hl.songs.forYou,
-            unlockedByIndex: null,
-            x: 0,
-            y: 0,
-            pathToLevel: [],
-            maxFrames: 8836,
-            difficulty: 5,
-          },*/
-          {
-            levelName: "Rum n' Bass",
-            levelFileName: "rum-and-bass",
-            song: hl.songs.rummy,
-            unlockedByIndex: null,
-            x: 0,
-            y: 0,
-            pathToLevel: [],
-            maxFrames: 11577,
-            difficulty: 6,
-          },
-          /*{
-            levelName: "Cool Friends",
-            levelFileName: "cool-friends",
-            song: hl.songs.coolFriends,
+              unlockedByIndex: 2,
+              x: 150,
+              y: 100,
+              pathToLevel: [
+                [120, 10],
+                [140, 45],
+              ],
+              maxFrames: 9738,
+              difficulty: 8,
+            },
+            {
+              levelName: "Indestructable",
+              levelFileName: "indestructable",
+              song: hl.songs.indestructable,
+              unlockedByIndex: null, //2,
+              x: 250,
+              y: 20,
+              pathToLevel: [
+                [150, -20],
+                [220, 20],
+              ],
+              maxFrames: 5647,
+              difficulty: 4,
+              boss: getRobotBoss(),
+            },
+          ],
+          Bl = [
+            {
+              levelName: "Glitched Out",
+              levelFileName: "glitched-out",
+              song: hl.songs.glitchedOut,
+              unlockedByIndex: null,
+              x: -250,
+              y: 30,
+              pathToLevel: [],
+              maxFrames: 10643,
+              difficulty: 4,
+            },
+            {
+              levelName: "8 Bit Shuffle",
+              levelFileName: "8-bit-shuffle",
+              song: hl.songs.eightBitShuffle,
+              unlockedByIndex: 0,
+              x: -50,
+              y: 50,
+              pathToLevel: [
+                [-220, 30],
+                [-80, 50],
+              ],
+              maxFrames: 8407,
+              difficulty: 4,
+            },
+            {
+              levelName: "Milky Ways",
+              levelFileName: "milky-ways",
+              song: hl.songs.milkyWays,
+              unlockedByIndex: 1,
+              x: -110,
+              y: -100,
+              pathToLevel: [
+                [-60, -10],
+                [-80, -70],
+              ],
+              maxFrames: 9638,
+              difficulty: 9,
+            },
+            {
+              levelName: "Daydreamer",
+              levelFileName: "daydreamer",
+              song: hl.songs.daydreamer,
+              unlockedByIndex: 1,
+              x: 90,
+              y: -20,
+              pathToLevel: [
+                [-20, 50],
+                [60, -20],
+              ],
+              maxFrames: 7477,
+              difficulty: 5,
+              comingSoon: true,
+            },
+            {
+              levelName: "Critical Hit (Extended)",
+              levelFileName: "critical-hit",
+              song: hl.songs.criticalHitExtended,
+              unlockedByIndex: 3,
+              x: 250,
+              y: 50,
+              pathToLevel: [
+                [120, 0],
+                [220, 50],
+              ],
+              maxFrames: 5343,
+              difficulty: 5,
+              boss: getPixelBoss(),
+              comingSoon: true,
+            },
+          ],
+          Fl = [
+            {
+              levelName: "Silverdust",
+              levelFileName: "silverdust",
+              song: hl.songs.silverdust,
+              unlockedByIndex: null,
+              x: -240,
+              y: -30,
+              pathToLevel: [],
+              maxFrames: 7986,
+              difficulty: 2,
+            },
+            {
+              levelName: "Frontier",
+              levelFileName: "frontier",
+              song: hl.songs.frontier,
+              unlockedByIndex: 0,
+              x: -140,
+              y: 40,
+              pathToLevel: [
+                [-220, 0],
+                [-180, 40],
+              ],
+              maxFrames: 9377,
+              difficulty: 5,
+            },
+            {
+              levelName: "Theory Of Everything 3",
+              levelFileName: "toeiii",
+              song: hl.songs.toe3,
+              unlockedByIndex: 1,
+              x: -60,
+              y: -100,
+              pathToLevel: [
+                [-120, -20],
+                [-100, -80],
+              ],
+              maxFrames: 9156,
+              difficulty: 8,
+            },
+            {
+              levelName: "Accelerated",
+              levelFileName: "accelerated",
+              song: hl.songs.accelerated,
+              unlockedByIndex: 1,
+              x: 110,
+              y: 10,
+              pathToLevel: [
+                [-100, 40],
+                [70, 10],
+              ],
+              maxFrames: 7530,
+              difficulty: 2,
+            },
+            {
+              levelName: "Sky Fracture",
+              levelFileName: "sky-fracture",
+              song: hl.songs.skyFracture,
+              unlockedByIndex: 3,
+              x: 250,
+              y: 50,
+              pathToLevel: [
+                [150, 10],
+                [220, 40],
+              ],
+              maxFrames: 5460,
+              difficulty: 5,
+              boss: getFlyingBoss(),
+            },
+          ],
+          Yl = [
+            {
+              levelName: "True Colors",
+              levelFileName: "true-colors",
+              song: hl.songs.truecolors,
+              unlockedByIndex: null,
+              x: -240,
+              y: 30,
+              pathToLevel: [],
+              maxFrames: 10420,
+              difficulty: 3,
+            },
+            {
+              levelName: "Color",
+              levelFileName: "color",
+              song: hl.songs.color,
+              unlockedByIndex: 0,
+              x: -100,
+              y: 0,
+              pathToLevel: [
+                [-220, 30],
+                [-130, 0],
+              ],
+              maxFrames: 10111,
+              difficulty: 4,
+            },
+            {
+              levelName: "Coincidence",
+              levelFileName: "coincidence",
+              song: hl.songs.coincidence,
+              unlockedByIndex: 1,
+              x: 120,
+              y: 60,
+              pathToLevel: [
+                [-70, 0],
+                [90, 50],
+              ],
+              maxFrames: 8685,
+              difficulty: 5,
+            },
+            {
+              levelName: "Rattlesnake",
+              levelFileName: "rattlesnake",
+              song: hl.songs.rattlesnake,
+              unlockedByIndex: 2,
+              x: 140,
+              y: -120,
+              pathToLevel: [
+                [120, 5],
+                [130, -20],
+              ],
+              maxFrames: 11714,
+              difficulty: 10,
+              comingSoon: true,
+            },
+            {
+              levelName: "Overdrive",
+              levelFileName: "overdrive",
+              song: hl.songs.overdrive,
+              unlockedByIndex: null, //2,
+              x: 250,
+              y: 0,
+              pathToLevel: [
+                [160, 50],
+                [220, 0],
+              ],
+              maxFrames: 5597,
+              difficulty: 6,
+              boss: getDemonBoss(),
+            },
+          ],
+          world5levels = [
+            {
+              levelName: "Fire Aura 2",
+              levelFileName: "fire-aura",
+              author: "Alfredo Gamer",
+              song: hl.songs.fireAura,
+              unlockedByIndex: null,
+              x: -240,
+              y: 20,
+              pathToLevel: [],
+              maxFrames: 9877,
+              difficulty: 7,
+            },
+            {
+              levelName: "Heaven 2",
+              levelFileName: "heaven",
+              song: hl.songs.heaven,
+              unlockedByIndex: 0,
+              x: -100,
+              y: -30,
+              pathToLevel: [],
+              maxFrames: 9877,
+              difficulty: 7,
+            },
+          ],
+          Ul = [
+            /*{
+              levelName: "Cloud 9",
+              levelFileName: "cloud-9",
+              song: hl.songs.cloud9,
+              unlockedByIndex: null,
+              x: 0,
+              y: 0,
+              pathToLevel: [],
+              maxFrames: 9070,
+              difficulty: 5,
+            },*/
+            {
+              levelName: "Virtual",
+              levelFileName: "virtual",
+              song: hl.songs.virtual,
+              unlockedByIndex: null,
+              x: 0,
+              y: 0,
+              pathToLevel: [],
+              maxFrames: 9637,
+              difficulty: 7,
+            },
+            {
+              levelName: "Normal Polymorph",
+              levelFileName: "polymorph",
+              author: "Fluke Games, d016",
+              song: hl.songs.polymorph,
+              unlockedByIndex: null,
+              x: 0,
+              y: 0,
+              pathToLevel: [],
+              maxFrames: 8782,
+              difficulty: 8,
+            },
+            /*{
+              levelName: "For You",
+              levelFileName: "for-you",
+              author: "Fluke Games",
+              song: hl.songs.forYou,
+              unlockedByIndex: null,
+              x: 0,
+              y: 0,
+              pathToLevel: [],
+              maxFrames: 8836,
+              difficulty: 5,
+            },*/
+            {
+              levelName: "Rum n' Bass",
+              levelFileName: "rum-and-bass",
+              song: hl.songs.rummy,
+              unlockedByIndex: null,
+              x: 0,
+              y: 0,
+              pathToLevel: [],
+              maxFrames: 11577,
+              difficulty: 6,
+            },
+            /*{
+              levelName: "Cool Friends",
+              levelFileName: "cool-friends",
+              song: hl.songs.coolFriends,
+>>>>>>> 8740d7ccb287389ed55f3dccfd4159210feb279a
 
             author: "Fluke Games",
             unlockedByIndex: null,
@@ -49091,378 +52165,519 @@ var version = "v1.17.2";
               } catch (e) {
                 return Error("Unable to map data to latest version");
               }
-              const l = Md(o, t);
-              return l instanceof Error
-                ? l
-                : { data: a(l), didUpdate: r, dateUpdated: s };
-            }
-            return Error("Couldn't read version");
-          },
-          dataToJson: function (t, a) {
-            return [e.length, Dd(a), i(t)];
-          },
-        };
-      }
-      function Dd(e) {
-        return Math.round((e().getTime() - 16094592e5) / 6e4);
-      }
-      (!(function (e) {
-        ((e[(e.True = 0)] = "True"), (e[(e.False = 1)] = "False"));
-      })(sd || (sd = {})),
-        (function (e) {
-          ((e[(e.Dragonfly = 0)] = "Dragonfly"),
-            (e[(e.Solace = 1)] = "Solace"),
-            (e[(e.Lighthouse = 2)] = "Lighthouse"),
-            (e[(e.Octane = 3)] = "Octane"),
-            (e[(e.Stardust = 4)] = "Stardust"),
-            (e[(e.ThinkDifferent = 5)] = "ThinkDifferent"),
-            (e[(e.DarkSheep = 6)] = "DarkSheep"),
-            (e[(e.EightBitAdventure = 7)] = "EightBitAdventure"),
-            (e[(e.Indestructable = 8)] = "Indestructable"),
-            (e[(e.Frontier = 9)] = "Frontier"),
-            (e[(e.Polymorph = 10)] = "Polymorph"),
-            (e[(e.Accelerated = 11)] = "Accelerated"),
-            (e[(e.CriticalHit = 12)] = "CriticalHit"),
-            (e[(e.SkyFracture = 13)] = "SkyFracture"),
-            (e[(e.Breathe = 14)] = "Breathe"),
-            (e[(e.Blythe = 15)] = "Blythe"),
-            (e[(e.Awake = 16)] = "Awake"),
-            (e[(e.Coincidence = 17)] = "Coincidence"),
-            (e[(e.Mutant = 18)] = "Mutant"),
-            (e[(e.Overdrive = 19)] = "Overdrive"),
-            (e[(e.Cloud9 = 20)] = "Cloud9"));
-        })(od || (od = {})),
-        (function (e) {
-          ((e[(e.World1 = 0)] = "World1"),
-            (e[(e.World1Boss = 1)] = "World1Boss"),
-            (e[(e.World1Red = 2)] = "World1Red"),
-            (e[(e.World2 = 3)] = "World2"),
-            (e[(e.World2Red = 4)] = "World2Red"),
-            (e[(e.World3 = 5)] = "World3"),
-            (e[(e.Synthwave = 6)] = "Synthwave"),
-            (e[(e.World4 = 7)] = "World4"),
-            (e[(e.World4Red = 8)] = "World4Red"),
-            (e[(e.World4Boss = 9)] = "World4Boss"),
-            (e[(e.World3Red = 10)] = "World3Red"),
-            (e[(e.Skater = 11)] = "Skater"));
-        })(rd || (rd = {})),
-        (function (e) {
-          ((e[(e.Rot0 = 0)] = "Rot0"),
-            (e[(e.Rot90 = 1)] = "Rot90"),
-            (e[(e.Rot180 = 2)] = "Rot180"),
-            (e[(e.Rot270 = 3)] = "Rot270"));
-        })(ld || (ld = {})),
-        (function (e) {
-          ((e[(e.Static = 0)] = "Static"),
-            (e[(e.UpDown = 1)] = "UpDown"),
-            (e[(e.DownUp = 2)] = "DownUp"),
-            (e[(e.Falling = 3)] = "Falling"),
-            (e[(e.Rail = 4)] = "Rail"));
-        })(cd || (cd = {})),
-        (function (e) {
-          ((e[(e.Beat = 0)] = "Beat"),
-            (e[(e.Jump = 1)] = "Jump"),
-            (e[(e.Switch = 2)] = "Switch"));
-        })(dd || (dd = {})),
-        (function (e) {
-          ((e[(e.Left = 0)] = "Left"), (e[(e.Right = 1)] = "Right"));
-        })(ud || (ud = {})),
-        (function (e) {
-          ((e[(e.SingleUse = 0)] = "SingleUse"),
-            (e[(e.MultiUse = 1)] = "MultiUse"));
-        })(usage || (usage = {})),
-        (function (e) {
-          ((e[(e.Static = -1)] = "Static"),
-            (e[(e.UpDown = 0)] = "UpDown"),
-            (e[(e.DownUp = 1)] = "DownUp"),
-            (e[(e.Falling = 2)] = "Falling"));
-        })(hd || (hd = {})),
-        (function (e) {
-          ((e[(e.Beat = 0)] = "Beat"),
-            (e[(e.Jump = 1)] = "Jump"),
-            (e[(e.Switch = 2)] = "Switch"));
-        })(pd || (pd = {})),
-        (function (e) {
-          ((e[(e.Checkpoint = 0)] = "Checkpoint"),
-            (e[(e.EndOfLevel = 1)] = "EndOfLevel"));
-        })(gd || (gd = {})),
-        (function (e) {
-          ((e[(e.Gun = 0)] = "Gun"),
-            (e[(e.DoubleJump = 1)] = "DoubleJump"),
-            (e[(e.Jetpack = 2)] = "Jetpack"),
-            (e[(e.PlayerStack = 3)] = "PlayerStack"),
-            (e[(e.Skateboard = 4)] = "Skateboard"));
-        })(md || (md = {})),
-        (function (e) {
-          ((e[(e.Shooter = 0)] = "Shooter"),
-            (e[(e.Walker = 1)] = "Walker"),
-            (e[(e.WalkerHelmet = 2)] = "WalkerHelmet"));
-          e[(e.Bomb = 3)] = "Bomb";
-          e[(e.Minion = 4)] = "Minion";
-          e[(e.Fireball = 5)] = "Fireball";
-        })(fd || (fd = {})),
-        (function (e) {
-          ((e[(e.Up = 0)] = "Up"), (e[(e.Right = 1)] = "Right"));
-        })(yd || (yd = {})),
-        (function (e) {
-          ((e[(e.Switch = 0)] = "Switch"), (e[(e.Jump = 1)] = "Jump"));
-        })(Ed || (Ed = {})),
-        (function (e) {
-          ((e[(e.A = 0)] = "A"), (e[(e.B = 1)] = "B"));
-        })(bd || (bd = {})),
-        (function (e) {
-          ((e[(e.Left = 0)] = "Left"),
-            (e[(e.Right = 1)] = "Right"),
-            (e[(e.Up = 2)] = "Up"),
-            (e[(e.Down = 3)] = "Down"));
-        })(Sd || (Sd = {})),
-        (function (e) {
-          ((e[(e.Gun = 0)] = "Gun"),
-            (e[(e.DoubleJump = 1)] = "DoubleJump"),
-            (e[(e.Jetpack = 2)] = "Jetpack"),
-            (e[(e.PlayerStack = 3)] = "PlayerStack"),
-            (e[(e.Skateboard = 4)] = "Skateboard"),
-            (e[(e.Punch = 5)] = "Punch"));
-          e[(e.Drill = 6)] = "Drill";
-          e[(e.Ghost = 7)] = "Ghost";
-          e[(e.Spaceship = 8)] = "Spaceship";
-        })(Id || (Id = {})),
-        (function (e) {
-          ((e[(e.Movement = 0)] = "Movement"),
-            (e[(e.BlockSpike = 1)] = "BlockSpike"));
-          e[(e.Size = 2)] = "Size";
-          e[(e.Color = 3)] = "Color";
-          e[(e.Gravity = 4)] = "Gravity";
-          e[(e.Falling = 5)] = "Falling";
-        })(_d || (_d = {})),
-        (function (e) {
-          ((e[(e.Coin = 0)] = "Coin"), (e[(e.Arrows = 1)] = "Arrows"));
-        })(vd || (vd = {})),
-        (function (e) {
-          ((e[(e.Left = 0)] = "Left"), (e[(e.Right = 1)] = "Right"));
-        })(Td || (Td = {})),
-        (function (e) {
-          ((e[(e.Dragonfly = 0)] = "Dragonfly"),
-            (e[(e.Solace = 1)] = "Solace"),
-            (e[(e.Lighthouse = 2)] = "Lighthouse"),
-            (e[(e.Octane = 3)] = "Octane"),
-            (e[(e.Stardust = 4)] = "Stardust"),
-            (e[(e.ThinkDifferent = 5)] = "ThinkDifferent"),
-            (e[(e.DarkSheep = 6)] = "DarkSheep"),
-            (e[(e.EightBitAdventure = 7)] = "EightBitAdventure"),
-            (e[(e.Indestructable = 8)] = "Indestructable"),
-            (e[(e.Frontier = 9)] = "Frontier"),
-            (e[(e.Polymorph = 10)] = "Polymorph"),
-            (e[(e.Accelerated = 11)] = "Accelerated"),
-            (e[(e.CriticalHit = 12)] = "CriticalHit"),
-            (e[(e.SkyFracture = 13)] = "SkyFracture"),
-            (e[(e.Breathe = 14)] = "Breathe"),
-            (e[(e.Blythe = 15)] = "Blythe"),
-            (e[(e.Awake = 16)] = "Awake"),
-            (e[(e.Coincidence = 17)] = "Coincidence"),
-            (e[(e.Mutant = 18)] = "Mutant"),
-            (e[(e.Overdrive = 19)] = "Overdrive"),
-            (e[(e.Cloud9 = 20)] = "Cloud9"),
-            (e[(e.ForYou = 21)] = "ForYou"),
-            (e[(e.Aura = 22)] = "Aura"),
-            (e[(e.CoolFriends = 23)] = "CoolFriends"),
-            (e[(e.NacreousSnowmelt = 24)] = "NacreousSnowmelt"));
-          e[(e.FireAura = 25)] = "FireAura";
-          e[(e.ChaozFantasy = 26)] = "ChaozFantasy";
-          e[(e.Heaven = 27)] = "Heaven";
-          e[(e.Phazd = 28)] = "Phazd";
-          e[(e.Virtual = 29)] = "Virtual";
-          e[(e.SolarAbyss = 30)] = "SolarAbyss";
-          e[(e.Toe3 = 31)] = "Toe3";
-          e[(e.Silverdust = 32)] = "Silverdust";
-          e[(e.Truecolors = 33)] = "Truecolors";
-          e[(e.Soulless2 = 34)] = "Soulless2";
-          e[(e.PirateManners = 35)] = "PirateManners";
-          e[(e.EightBitShuffle = 36)] = "EightBitShuffle";
-          e[(e.FinalTheory = 37)] = "FinalTheory";
-          e[(e.SuperUltra = 38)] = "SuperUltra";
-          e[(e.Rummy = 39)] = "Rummy";
-          e[(e.Daydreamer = 40)] = "Daydreamer";
-          e[(e.OrientalSwing = 41)] = "OrientalSwing";
-          e[(e.RedShift = 42)] = "RedShift";
-          e[(e.RaceAroundTheWorld = 43)] = "RaceAroundTheWorld";
-          e[(e.Machina = 44)] = "Machina";
-          e[(e.Clutterfunk = 45)] = "Clutterfunk";
-          e[(e.Soulless4 = 46)] = "Soulless4";
-          e[(e.Zenith = 47)] = "Zenith";
-          e[(e.Color = 48)] = "Color";
-          e[(e.FunkyPunky = 49)] = "FunkyPunky";
-          e[(e.OctaneExtended = 50)] = "OctaneExtended";
-          e[(e.CriticalHitExtended = 51)] = "CriticalHitExtended";
-          e[(e.MindsOfTheMad = 52)] = "MindsOfTheMad";
-          e[(e.Electrodynamix = 53)] = "Electrodynamix";
-          e[(e.SkyFractureExtended = 54)] = "SkyFractureExtended";
-          e[(e.Plummet = 55)] = "Plummet";
-          e[(e.SolarWind = 56)] = "SolarWind";
-          e[(e.GlitchedOut = 57)] = "GlitchedOut";
-          e[(e.LastTile = 58)] = "LastTile";
-          // you know what? I'm not gonna put songs here. This variable (Rd) isn't even used anywhere.
-        })(Rd || (Rd = {})),
-        (function (e) {
-          ((e[(e.World1 = 0)] = "World1"),
-            (e[(e.World1Boss = 1)] = "World1Boss"),
-            (e[(e.World1Red = 2)] = "World1Red"),
-            (e[(e.World2 = 3)] = "World2"),
-            (e[(e.World2Red = 4)] = "World2Red"),
-            (e[(e.World3 = 5)] = "World3"),
-            (e[(e.Synthwave = 6)] = "Synthwave"),
-            (e[(e.World4 = 7)] = "World4"),
-            (e[(e.World4Red = 8)] = "World4Red"),
-            (e[(e.World4Boss = 9)] = "World4Boss"),
-            (e[(e.World3Red = 10)] = "World3Red"),
-            (e[(e.Skater = 11)] = "Skater"),
-            (e[(e.Arrows = 12)] = "Arrows"),
-            (e[(e.Dreamy = 13)] = "Dreamy"),
-            (e[(e.Speed = 14)] = "Speed"),
-            (e[(e.Fighter = 15)] = "Fighter"));
-          e[(e.Classic = 16)] = "Classic";
-          e[(e.Infinite = 17)] = "Infinite";
-          e[(e.Virtual = 18)] = "Virtual";
-        })(Od || (Od = {})),
-        (function (e) {
-          ((e[(e.Gun = 0)] = "Gun"),
-            (e[(e.DoubleJump = 1)] = "DoubleJump"),
-            (e[(e.Jetpack = 2)] = "Jetpack"),
-            (e[(e.PlayerStack = 3)] = "PlayerStack"),
-            (e[(e.Skateboard = 4)] = "Skateboard"),
-            (e[(e.Punch = 5)] = "Punch"));
-          e[(e.Drill = 6)] = "Drill";
-          e[(e.Ghost = 7)] = "Ghost";
-          e[(e.Spaceship = 8)] = "Spaceship";
-        })(Cd || (Cd = {})),
-        (function (e) {
-          ((e[(e.Movement = 0)] = "Movement"),
-            (e[(e.BlockSpike = 1)] = "BlockSpike"));
-          e[(e.Size = 2)] = "Size";
-          e[(e.Color = 3)] = "Color";
-          e[(e.Gravity = 4)] = "Gravity";
-          e[(e.Falling = 5)] = "Falling";
-        })(wd || (wd = {})),
-        (function (e) {
-          ((e[(e.Red = 0)] = "Red"), (e[(e.Yellow = 1)] = "Yellow"));
-          e[(e.Green = 2)] = "Green";
-          e[(e.Cyan = 3)] = "Cyan";
-          ((e[(e.Blue = 4)] = "Blue"), (e[(e.Violet = 5)] = "Violet"));
-          e[(e.Pink = 6)] = "Pink";
-          e[(e.Black = 7)] = "Black";
-          e[(e.White = 8)] = "White";
-          e[(e.Flash = 9)] = "Flash";
-        })(clrs2 || (clrs2 = {})),
-        (function (e) {
-          ((e[(e.Coin = 0)] = "Coin"), (e[(e.Arrows = 1)] = "Arrows"));
-        })(Ad || (Ad = {})),
-        (function (e) {
-          ((e[(e.Left = 0)] = "Left"), (e[(e.Right = 1)] = "Right"));
-        })(kd || (kd = {})),
-        (function (e) {
-          ((e[(e.Dragonfly = 0)] = "Dragonfly"),
-            (e[(e.Solace = 1)] = "Solace"),
-            (e[(e.Lighthouse = 2)] = "Lighthouse"),
-            (e[(e.Octane = 3)] = "Octane"),
-            (e[(e.Stardust = 4)] = "Stardust"),
-            (e[(e.ThinkDifferent = 5)] = "ThinkDifferent"),
-            (e[(e.DarkSheep = 6)] = "DarkSheep"),
-            (e[(e.EightBitAdventure = 7)] = "EightBitAdventure"),
-            (e[(e.Indestructable = 8)] = "Indestructable"),
-            (e[(e.Frontier = 9)] = "Frontier"),
-            (e[(e.Polymorph = 10)] = "Polymorph"),
-            (e[(e.Accelerated = 11)] = "Accelerated"),
-            (e[(e.CriticalHit = 12)] = "CriticalHit"),
-            (e[(e.SkyFracture = 13)] = "SkyFracture"),
-            (e[(e.Breathe = 14)] = "Breathe"),
-            (e[(e.Blythe = 15)] = "Blythe"),
-            (e[(e.Awake = 16)] = "Awake"),
-            (e[(e.Coincidence = 17)] = "Coincidence"),
-            (e[(e.Mutant = 18)] = "Mutant"),
-            (e[(e.Overdrive = 19)] = "Overdrive"),
-            (e[(e.Cloud9 = 20)] = "Cloud9"),
-            (e[(e.ForYou = 21)] = "ForYou"),
-            (e[(e.Aura = 22)] = "Aura"),
-            (e[(e.CoolFriends = 23)] = "CoolFriends"),
-            (e[(e.NacreousSnowmelt = 24)] = "NacreousSnowmelt"));
-          e[(e.FireAura = 25)] = "FireAura";
-          e[(e.ChaozFantasy = 26)] = "ChaozFantasy";
-          e[(e.Heaven = 27)] = "Heaven";
-          e[(e.Phazd = 28)] = "Phazd";
-          e[(e.Virtual = 29)] = "Virtual";
-          e[(e.SolarAbyss = 30)] = "SolarAbyss";
-          e[(e.Toe3 = 31)] = "Toe3";
-          e[(e.Silverdust = 32)] = "Silverdust";
-          e[(e.Truecolors = 33)] = "Truecolors";
-          e[(e.Soulless2 = 34)] = "Souless2";
-          e[(e.PirateManners = 35)] = "PirateManners";
-          e[(e.EightBitShuffle = 36)] = "EightBitShuffle";
-          e[(e.FinalTheory = 37)] = "FinalTheory";
-          e[(e.SuperUltra = 38)] = "SuperUltra";
-          e[(e.Rummy = 39)] = "Rummy";
-          e[(e.Daydreamer = 40)] = "Daydreamer";
-          e[(e.OrientalSwing = 41)] = "OrientalSwing";
-          e[(e.RedShift = 42)] = "RedShift";
-          e[(e.RaceAroundTheWorld = 43)] = "RaceAroundTheWorld";
-          e[(e.Machina = 44)] = "Machina";
-          e[(e.Clutterfunk = 45)] = "Clutterfunk";
-          e[(e.Soulless4 = 46)] = "Soulless4";
-          e[(e.Zenith = 47)] = "Zenith";
-          e[(e.Color = 48)] = "Color";
-          e[(e.FunkyPunky = 49)] = "FunkyPunky";
-          e[(e.OctaneExtended = 50)] = "OctaneExtended";
-          e[(e.CriticalHitExtended = 51)] = "CriticalHitExtended";
-          e[(e.MindsOfTheMad = 52)] = "MindsOfTheMad";
-          e[(e.Electrodynamix = 53)] = "Electrodynamix";
-          e[(e.SkyFractureExtended = 54)] = "SkyFractureExtended";
-          e[(e.Plummet = 55)] = "Plummet";
-          e[(e.SolarWind = 56)] = "SolarWind";
-          e[(e.GlitchedOut = 57)] = "GlitchedOut";
-          e[(e.LastTile = 58)] = "LastTile";
-          e[(e.Hellidox = 59)] = "Hellidox";
-          e[(e.Jackpot = 60)] = "Jackpot";
-          e[(e.Carnival = 61)] = "Carnival";
-          e[(e.RobotLanguage = 62)] = "RobotLanguage";
-          e[(e.DryOut = 63)] = "DryOut";
-          e[(e.Carnivores = 64)] = "Carnivores";
-          e[(e.Phobos = 65)] = "Phobos";
-          e[(e.RockinThatBass = 66)] = "RockinThatBass";
-          e[(e.MilkyWays = 67)] = "MilkyWays";
-        })(Nd || (Nd = {})),
-        (function (e) {
-          ((e[(e.World1 = 0)] = "World1"),
-            (e[(e.World1Boss = 1)] = "World1Boss"),
-            (e[(e.World1Red = 2)] = "World1Red"),
-            (e[(e.World2 = 3)] = "World2"),
-            (e[(e.World2Red = 4)] = "World2Red"),
-            (e[(e.World3 = 5)] = "World3"),
-            (e[(e.Synthwave = 6)] = "Synthwave"),
-            (e[(e.World4 = 7)] = "World4"),
-            (e[(e.World4Red = 8)] = "World4Red"),
-            (e[(e.World4Boss = 9)] = "World4Boss"),
-            (e[(e.World3Red = 10)] = "World3Red"),
-            (e[(e.Skater = 11)] = "Skater"),
-            (e[(e.Arrows = 12)] = "Arrows"),
-            (e[(e.Dreamy = 13)] = "Dreamy"),
-            (e[(e.Speed = 14)] = "Speed"),
-            (e[(e.Fighter = 15)] = "Fighter"));
-          e[(e.Classic = 16)] = "Classic";
-          e[(e.Infinite = 17)] = "Infinite";
-          e[(e.Virtual = 18)] = "Virtual";
-        })(xd || (xd = {})));
-      const Bd = Gc([
-        mc,
-        mc,
-        Bc([Gc(mc, fc, mc, mc), fc]),
-        Bc([
-          nd.tuple([
-            Bc([Gc([mc, fc]), Gc([mc])]),
-            Oc(
-              Bc([
-                Gc([fc, fc, _c(1), _c(0), nd.enum5]),
-                Gc([fc, fc, _c(0), nd.enum5]),
-                Gc([fc, fc, _c(1)]),
-                Gc([fc, fc]),
+              return Error("Couldn't read version");
+            },
+            dataToJson: function (t, a) {
+              return [e.length, Dd(a), i(t)];
+            },
+          };
+        }
+        function Dd(e) {
+          return Math.round((e().getTime() - 16094592e5) / 6e4);
+        }
+        (!(function (e) {
+          ((e[(e.True = 0)] = "True"), (e[(e.False = 1)] = "False"));
+        })(sd || (sd = {})),
+          (function (e) {
+            ((e[(e.Dragonfly = 0)] = "Dragonfly"),
+              (e[(e.Solace = 1)] = "Solace"),
+              (e[(e.Lighthouse = 2)] = "Lighthouse"),
+              (e[(e.Octane = 3)] = "Octane"),
+              (e[(e.Stardust = 4)] = "Stardust"),
+              (e[(e.ThinkDifferent = 5)] = "ThinkDifferent"),
+              (e[(e.DarkSheep = 6)] = "DarkSheep"),
+              (e[(e.EightBitAdventure = 7)] = "EightBitAdventure"),
+              (e[(e.Indestructable = 8)] = "Indestructable"),
+              (e[(e.Frontier = 9)] = "Frontier"),
+              (e[(e.Polymorph = 10)] = "Polymorph"),
+              (e[(e.Accelerated = 11)] = "Accelerated"),
+              (e[(e.CriticalHit = 12)] = "CriticalHit"),
+              (e[(e.SkyFracture = 13)] = "SkyFracture"),
+              (e[(e.Breathe = 14)] = "Breathe"),
+              (e[(e.Blythe = 15)] = "Blythe"),
+              (e[(e.Awake = 16)] = "Awake"),
+              (e[(e.Coincidence = 17)] = "Coincidence"),
+              (e[(e.Mutant = 18)] = "Mutant"),
+              (e[(e.Overdrive = 19)] = "Overdrive"),
+              (e[(e.Cloud9 = 20)] = "Cloud9"));
+          })(od || (od = {})),
+          (function (e) {
+            ((e[(e.World1 = 0)] = "World1"),
+              (e[(e.World1Boss = 1)] = "World1Boss"),
+              (e[(e.World1Red = 2)] = "World1Red"),
+              (e[(e.World2 = 3)] = "World2"),
+              (e[(e.World2Red = 4)] = "World2Red"),
+              (e[(e.World3 = 5)] = "World3"),
+              (e[(e.Synthwave = 6)] = "Synthwave"),
+              (e[(e.World4 = 7)] = "World4"),
+              (e[(e.World4Red = 8)] = "World4Red"),
+              (e[(e.World4Boss = 9)] = "World4Boss"),
+              (e[(e.World3Red = 10)] = "World3Red"),
+              (e[(e.Skater = 11)] = "Skater"));
+          })(rd || (rd = {})),
+          (function (e) {
+            ((e[(e.Rot0 = 0)] = "Rot0"),
+              (e[(e.Rot90 = 1)] = "Rot90"),
+              (e[(e.Rot180 = 2)] = "Rot180"),
+              (e[(e.Rot270 = 3)] = "Rot270"));
+          })(ld || (ld = {})),
+          (function (e) {
+            ((e[(e.Static = 0)] = "Static"),
+              (e[(e.UpDown = 1)] = "UpDown"),
+              (e[(e.DownUp = 2)] = "DownUp"),
+              (e[(e.Falling = 3)] = "Falling"),
+              (e[(e.Rail = 4)] = "Rail"));
+          })(cd || (cd = {})),
+          (function (e) {
+            ((e[(e.Beat = 0)] = "Beat"),
+              (e[(e.Jump = 1)] = "Jump"),
+              (e[(e.Switch = 2)] = "Switch"));
+          })(dd || (dd = {})),
+          (function (e) {
+            ((e[(e.Left = 0)] = "Left"), (e[(e.Right = 1)] = "Right"));
+          })(ud || (ud = {})),
+          (function (e) {
+            ((e[(e.SingleUse = 0)] = "SingleUse"),
+              (e[(e.MultiUse = 1)] = "MultiUse"));
+          })(usage || (usage = {})),
+          (function (e) {
+            ((e[(e.Static = -1)] = "Static"),
+              (e[(e.UpDown = 0)] = "UpDown"),
+              (e[(e.DownUp = 1)] = "DownUp"),
+              (e[(e.Falling = 2)] = "Falling"));
+          })(hd || (hd = {})),
+          (function (e) {
+            ((e[(e.Beat = 0)] = "Beat"),
+              (e[(e.Jump = 1)] = "Jump"),
+              (e[(e.Switch = 2)] = "Switch"));
+          })(pd || (pd = {})),
+          (function (e) {
+            ((e[(e.Checkpoint = 0)] = "Checkpoint"),
+              (e[(e.EndOfLevel = 1)] = "EndOfLevel"));
+          })(gd || (gd = {})),
+          (function (e) {
+            ((e[(e.Gun = 0)] = "Gun"),
+              (e[(e.DoubleJump = 1)] = "DoubleJump"),
+              (e[(e.Jetpack = 2)] = "Jetpack"),
+              (e[(e.PlayerStack = 3)] = "PlayerStack"),
+              (e[(e.Skateboard = 4)] = "Skateboard"));
+          })(md || (md = {})),
+          (function (e) {
+            ((e[(e.Shooter = 0)] = "Shooter"),
+              (e[(e.Walker = 1)] = "Walker"),
+              (e[(e.WalkerHelmet = 2)] = "WalkerHelmet"));
+            e[(e.Bomb = 3)] = "Bomb";
+            e[(e.Minion = 4)] = "Minion";
+            e[(e.Fireball = 5)] = "Fireball";
+          })(fd || (fd = {})),
+          (function (e) {
+            ((e[(e.Up = 0)] = "Up"), (e[(e.Right = 1)] = "Right"));
+          })(yd || (yd = {})),
+          (function (e) {
+            ((e[(e.Switch = 0)] = "Switch"), (e[(e.Jump = 1)] = "Jump"));
+          })(Ed || (Ed = {})),
+          (function (e) {
+            ((e[(e.A = 0)] = "A"), (e[(e.B = 1)] = "B"));
+          })(bd || (bd = {})),
+          (function (e) {
+            ((e[(e.Left = 0)] = "Left"),
+              (e[(e.Right = 1)] = "Right"),
+              (e[(e.Up = 2)] = "Up"),
+              (e[(e.Down = 3)] = "Down"));
+          })(Sd || (Sd = {})),
+          (function (e) {
+            ((e[(e.Gun = 0)] = "Gun"),
+              (e[(e.DoubleJump = 1)] = "DoubleJump"),
+              (e[(e.Jetpack = 2)] = "Jetpack"),
+              (e[(e.PlayerStack = 3)] = "PlayerStack"),
+              (e[(e.Skateboard = 4)] = "Skateboard"),
+              (e[(e.Punch = 5)] = "Punch"));
+            e[(e.Drill = 6)] = "Drill";
+            e[(e.Ghost = 7)] = "Ghost";
+            e[(e.Spaceship = 8)] = "Spaceship";
+          })(Id || (Id = {})),
+          (function (e) {
+            ((e[(e.Movement = 0)] = "Movement"),
+              (e[(e.BlockSpike = 1)] = "BlockSpike"));
+            e[(e.Size = 2)] = "Size";
+            e[(e.Color = 3)] = "Color";
+            e[(e.Gravity = 4)] = "Gravity";
+            e[(e.Falling = 5)] = "Falling";
+          })(_d || (_d = {})),
+          (function (e) {
+            ((e[(e.Coin = 0)] = "Coin"), (e[(e.Arrows = 1)] = "Arrows"));
+          })(vd || (vd = {})),
+          (function (e) {
+            ((e[(e.Left = 0)] = "Left"), (e[(e.Right = 1)] = "Right"));
+          })(Td || (Td = {})),
+          (function (e) {
+            ((e[(e.Dragonfly = 0)] = "Dragonfly"),
+              (e[(e.Solace = 1)] = "Solace"),
+              (e[(e.Lighthouse = 2)] = "Lighthouse"),
+              (e[(e.Octane = 3)] = "Octane"),
+              (e[(e.Stardust = 4)] = "Stardust"),
+              (e[(e.ThinkDifferent = 5)] = "ThinkDifferent"),
+              (e[(e.DarkSheep = 6)] = "DarkSheep"),
+              (e[(e.EightBitAdventure = 7)] = "EightBitAdventure"),
+              (e[(e.Indestructable = 8)] = "Indestructable"),
+              (e[(e.Frontier = 9)] = "Frontier"),
+              (e[(e.Polymorph = 10)] = "Polymorph"),
+              (e[(e.Accelerated = 11)] = "Accelerated"),
+              (e[(e.CriticalHit = 12)] = "CriticalHit"),
+              (e[(e.SkyFracture = 13)] = "SkyFracture"),
+              (e[(e.Breathe = 14)] = "Breathe"),
+              (e[(e.Blythe = 15)] = "Blythe"),
+              (e[(e.Awake = 16)] = "Awake"),
+              (e[(e.Coincidence = 17)] = "Coincidence"),
+              (e[(e.Mutant = 18)] = "Mutant"),
+              (e[(e.Overdrive = 19)] = "Overdrive"),
+              (e[(e.Cloud9 = 20)] = "Cloud9"),
+              (e[(e.ForYou = 21)] = "ForYou"),
+              (e[(e.Aura = 22)] = "Aura"),
+              (e[(e.CoolFriends = 23)] = "CoolFriends"),
+              (e[(e.NacreousSnowmelt = 24)] = "NacreousSnowmelt"));
+            e[(e.FireAura = 25)] = "FireAura";
+            e[(e.ChaozFantasy = 26)] = "ChaozFantasy";
+            e[(e.Heaven = 27)] = "Heaven";
+            e[(e.Phazd = 28)] = "Phazd";
+            e[(e.Virtual = 29)] = "Virtual";
+            e[(e.SolarAbyss = 30)] = "SolarAbyss";
+            e[(e.Toe3 = 31)] = "Toe3";
+            e[(e.Silverdust = 32)] = "Silverdust";
+            e[(e.Truecolors = 33)] = "Truecolors";
+            e[(e.Soulless2 = 34)] = "Soulless2";
+            e[(e.PirateManners = 35)] = "PirateManners";
+            e[(e.EightBitShuffle = 36)] = "EightBitShuffle";
+            e[(e.FinalTheory = 37)] = "FinalTheory";
+            e[(e.SuperUltra = 38)] = "SuperUltra";
+            e[(e.Rummy = 39)] = "Rummy";
+            e[(e.Daydreamer = 40)] = "Daydreamer";
+            e[(e.OrientalSwing = 41)] = "OrientalSwing";
+            e[(e.RedShift = 42)] = "RedShift";
+            e[(e.RaceAroundTheWorld = 43)] = "RaceAroundTheWorld";
+            e[(e.Machina = 44)] = "Machina";
+            e[(e.Clutterfunk = 45)] = "Clutterfunk";
+            e[(e.Soulless4 = 46)] = "Soulless4";
+            e[(e.Zenith = 47)] = "Zenith";
+            e[(e.Color = 48)] = "Color";
+            e[(e.FunkyPunky = 49)] = "FunkyPunky";
+            e[(e.OctaneExtended = 50)] = "OctaneExtended";
+            e[(e.CriticalHitExtended = 51)] = "CriticalHitExtended";
+            e[(e.MindsOfTheMad = 52)] = "MindsOfTheMad";
+            e[(e.Electrodynamix = 53)] = "Electrodynamix";
+            e[(e.SkyFractureExtended = 54)] = "SkyFractureExtended";
+            e[(e.Plummet = 55)] = "Plummet";
+            e[(e.SolarWind = 56)] = "SolarWind";
+            e[(e.GlitchedOut = 57)] = "GlitchedOut";
+            e[(e.LastTile = 58)] = "LastTile";
+            // you know what? I'm not gonna put songs here. This variable (Rd) isn't even used anywhere.
+          })(Rd || (Rd = {})),
+          (function (e) {
+            ((e[(e.World1 = 0)] = "World1"),
+              (e[(e.World1Boss = 1)] = "World1Boss"),
+              (e[(e.World1Red = 2)] = "World1Red"),
+              (e[(e.World2 = 3)] = "World2"),
+              (e[(e.World2Red = 4)] = "World2Red"),
+              (e[(e.World3 = 5)] = "World3"),
+              (e[(e.Synthwave = 6)] = "Synthwave"),
+              (e[(e.World4 = 7)] = "World4"),
+              (e[(e.World4Red = 8)] = "World4Red"),
+              (e[(e.World4Boss = 9)] = "World4Boss"),
+              (e[(e.World3Red = 10)] = "World3Red"),
+              (e[(e.Skater = 11)] = "Skater"),
+              (e[(e.Arrows = 12)] = "Arrows"),
+              (e[(e.Dreamy = 13)] = "Dreamy"),
+              (e[(e.Speed = 14)] = "Speed"),
+              (e[(e.Fighter = 15)] = "Fighter"));
+            e[(e.Classic = 16)] = "Classic";
+            e[(e.Infinite = 17)] = "Infinite";
+            e[(e.Virtual = 18)] = "Virtual";
+          })(Od || (Od = {})),
+          (function (e) {
+            ((e[(e.Gun = 0)] = "Gun"),
+              (e[(e.DoubleJump = 1)] = "DoubleJump"),
+              (e[(e.Jetpack = 2)] = "Jetpack"),
+              (e[(e.PlayerStack = 3)] = "PlayerStack"),
+              (e[(e.Skateboard = 4)] = "Skateboard"),
+              (e[(e.Punch = 5)] = "Punch"));
+            e[(e.Drill = 6)] = "Drill";
+            e[(e.Ghost = 7)] = "Ghost";
+            e[(e.Spaceship = 8)] = "Spaceship";
+          })(Cd || (Cd = {})),
+          (function (e) {
+            ((e[(e.Movement = 0)] = "Movement"),
+              (e[(e.BlockSpike = 1)] = "BlockSpike"));
+            e[(e.Size = 2)] = "Size";
+            e[(e.Color = 3)] = "Color";
+            e[(e.Gravity = 4)] = "Gravity";
+            e[(e.Falling = 5)] = "Falling";
+          })(wd || (wd = {})),
+          (function (e) {
+            ((e[(e.Red = 0)] = "Red"), (e[(e.Yellow = 1)] = "Yellow"));
+            e[(e.Green = 2)] = "Green";
+            e[(e.Cyan = 3)] = "Cyan";
+            ((e[(e.Blue = 4)] = "Blue"), (e[(e.Violet = 5)] = "Violet"));
+            e[(e.Pink = 6)] = "Pink";
+            e[(e.Black = 7)] = "Black";
+            e[(e.White = 8)] = "White";
+            e[(e.Flash = 9)] = "Flash";
+          })(clrs2 || (clrs2 = {})),
+          (function (e) {
+            ((e[(e.Coin = 0)] = "Coin"), (e[(e.Arrows = 1)] = "Arrows"));
+          })(Ad || (Ad = {})),
+          (function (e) {
+            ((e[(e.Left = 0)] = "Left"), (e[(e.Right = 1)] = "Right"));
+          })(kd || (kd = {})),
+          (function (e) {
+            ((e[(e.Dragonfly = 0)] = "Dragonfly"),
+              (e[(e.Solace = 1)] = "Solace"),
+              (e[(e.Lighthouse = 2)] = "Lighthouse"),
+              (e[(e.Octane = 3)] = "Octane"),
+              (e[(e.Stardust = 4)] = "Stardust"),
+              (e[(e.ThinkDifferent = 5)] = "ThinkDifferent"),
+              (e[(e.DarkSheep = 6)] = "DarkSheep"),
+              (e[(e.EightBitAdventure = 7)] = "EightBitAdventure"),
+              (e[(e.Indestructable = 8)] = "Indestructable"),
+              (e[(e.Frontier = 9)] = "Frontier"),
+              (e[(e.Polymorph = 10)] = "Polymorph"),
+              (e[(e.Accelerated = 11)] = "Accelerated"),
+              (e[(e.CriticalHit = 12)] = "CriticalHit"),
+              (e[(e.SkyFracture = 13)] = "SkyFracture"),
+              (e[(e.Breathe = 14)] = "Breathe"),
+              (e[(e.Blythe = 15)] = "Blythe"),
+              (e[(e.Awake = 16)] = "Awake"),
+              (e[(e.Coincidence = 17)] = "Coincidence"),
+              (e[(e.Mutant = 18)] = "Mutant"),
+              (e[(e.Overdrive = 19)] = "Overdrive"),
+              (e[(e.Cloud9 = 20)] = "Cloud9"),
+              (e[(e.ForYou = 21)] = "ForYou"),
+              (e[(e.Aura = 22)] = "Aura"),
+              (e[(e.CoolFriends = 23)] = "CoolFriends"),
+              (e[(e.NacreousSnowmelt = 24)] = "NacreousSnowmelt"));
+            e[(e.FireAura = 25)] = "FireAura";
+            e[(e.ChaozFantasy = 26)] = "ChaozFantasy";
+            e[(e.Heaven = 27)] = "Heaven";
+            e[(e.Phazd = 28)] = "Phazd";
+            e[(e.Virtual = 29)] = "Virtual";
+            e[(e.SolarAbyss = 30)] = "SolarAbyss";
+            e[(e.Toe3 = 31)] = "Toe3";
+            e[(e.Silverdust = 32)] = "Silverdust";
+            e[(e.Truecolors = 33)] = "Truecolors";
+            e[(e.Soulless2 = 34)] = "Souless2";
+            e[(e.PirateManners = 35)] = "PirateManners";
+            e[(e.EightBitShuffle = 36)] = "EightBitShuffle";
+            e[(e.FinalTheory = 37)] = "FinalTheory";
+            e[(e.SuperUltra = 38)] = "SuperUltra";
+            e[(e.Rummy = 39)] = "Rummy";
+            e[(e.Daydreamer = 40)] = "Daydreamer";
+            e[(e.OrientalSwing = 41)] = "OrientalSwing";
+            e[(e.RedShift = 42)] = "RedShift";
+            e[(e.RaceAroundTheWorld = 43)] = "RaceAroundTheWorld";
+            e[(e.Machina = 44)] = "Machina";
+            e[(e.Clutterfunk = 45)] = "Clutterfunk";
+            e[(e.Soulless4 = 46)] = "Soulless4";
+            e[(e.Zenith = 47)] = "Zenith";
+            e[(e.Color = 48)] = "Color";
+            e[(e.FunkyPunky = 49)] = "FunkyPunky";
+            e[(e.OctaneExtended = 50)] = "OctaneExtended";
+            e[(e.CriticalHitExtended = 51)] = "CriticalHitExtended";
+            e[(e.MindsOfTheMad = 52)] = "MindsOfTheMad";
+            e[(e.Electrodynamix = 53)] = "Electrodynamix";
+            e[(e.SkyFractureExtended = 54)] = "SkyFractureExtended";
+            e[(e.Plummet = 55)] = "Plummet";
+            e[(e.SolarWind = 56)] = "SolarWind";
+            e[(e.GlitchedOut = 57)] = "GlitchedOut";
+            e[(e.LastTile = 58)] = "LastTile";
+            e[(e.Hellidox = 59)] = "Hellidox";
+            e[(e.Jackpot = 60)] = "Jackpot";
+            e[(e.Carnival = 61)] = "Carnival";
+            e[(e.RobotLanguage = 62)] = "RobotLanguage";
+            e[(e.DryOut = 63)] = "DryOut";
+            e[(e.Carnivores = 64)] = "Carnivores";
+            e[(e.Phobos = 65)] = "Phobos";
+            e[(e.RockinThatBass = 66)] = "RockinThatBass";
+            e[(e.MilkyWays = 67)] = "MilkyWays";
+            e[(e.ParadiseOnE = 68)] = "ParadiseOnE";
+            e[(e.Rattlesnake = 69)] = "Rattlesnake";
+          })(Nd || (Nd = {})),
+          (function (e) {
+            ((e[(e.World1 = 0)] = "World1"),
+              (e[(e.World1Boss = 1)] = "World1Boss"),
+              (e[(e.World1Red = 2)] = "World1Red"),
+              (e[(e.World2 = 3)] = "World2"),
+              (e[(e.World2Red = 4)] = "World2Red"),
+              (e[(e.World3 = 5)] = "World3"),
+              (e[(e.Synthwave = 6)] = "Synthwave"),
+              (e[(e.World4 = 7)] = "World4"),
+              (e[(e.World4Red = 8)] = "World4Red"),
+              (e[(e.World4Boss = 9)] = "World4Boss"),
+              (e[(e.World3Red = 10)] = "World3Red"),
+              (e[(e.Skater = 11)] = "Skater"),
+              (e[(e.Arrows = 12)] = "Arrows"),
+              (e[(e.Dreamy = 13)] = "Dreamy"),
+              (e[(e.Speed = 14)] = "Speed"),
+              (e[(e.Fighter = 15)] = "Fighter"));
+            e[(e.Classic = 16)] = "Classic";
+            e[(e.Infinite = 17)] = "Infinite";
+            e[(e.Virtual = 18)] = "Virtual";
+          })(xd || (xd = {})));
+        const Bd = Gc([
+            mc,
+            mc,
+            Bc([Gc(mc, fc, mc, mc), fc]),
+            Bc([
+              nd.tuple([
+                Bc([Gc([mc, fc]), Gc([mc])]),
+                Oc(
+                  Bc([
+                    Gc([fc, fc, _c(1), _c(0), nd.enum5]),
+                    Gc([fc, fc, _c(0), nd.enum5]),
+                    Gc([fc, fc, _c(1)]),
+                    Gc([fc, fc]),
+                  ]),
+                ),
+                Oc(
+                  Bc([
+                    Gc([
+                      fc,
+                      fc,
+                      nd.enum4,
+                      nd.enum2,
+                      nd.enum2,
+                      nd.enum3,
+                      nd.enum2,
+                      nd.enum3,
+                    ]),
+                    Gc([fc, fc, nd.enum4, nd.enum2, nd.enum2, nd.enum3]),
+                    Gc([fc, fc, nd.enum4, _c(0), _c(1)]),
+                    Gc([fc, fc, nd.enum4, _c(1), _c(1)]),
+                    Gc([fc, fc, nd.enum4, _c(1)]),
+                    Gc([fc, fc, nd.enum4]),
+                  ]),
+                ),
+                Oc(
+                  Gc([
+                    fc,
+                    fc,
+                    nd.enum5,
+                    Bc([
+                      _c(-2),
+                      _c(-1),
+                      _c(-0.5),
+                      _c(0),
+                      _c(0.5),
+                      _c(1),
+                      _c(2),
+                    ]),
+                  ]),
+                ),
+                Oc(
+                  Bc([
+                    Gc([fc, fc, nd.enum2, nd.enum2, nd.enum2]),
+                    Gc([fc, fc, nd.enum2, nd.enum2]),
+                    Gc([fc, fc, nd.enum2]),
+                  ]),
+                ),
+                Oc(
+                  Bc([
+                    Gc([
+                      fc,
+                      fc,
+                      Bc([_c(-1), _c(0), _c(1), _c(2)]),
+                      Bc([
+                        _c(-2),
+                        _c(-1),
+                        _c(-0.5),
+                        _c(0),
+                        _c(0.5),
+                        _c(1),
+                        _c(2),
+                      ]),
+                      nd.enum4,
+                      nd.enum4,
+                    ]),
+                    Gc([
+                      fc,
+                      fc,
+                      Bc([_c(-1), _c(0), _c(1), _c(2)]),
+                      Bc([
+                        _c(-2),
+                        _c(-1),
+                        _c(-0.5),
+                        _c(0),
+                        _c(0.5),
+                        _c(1),
+                        _c(2),
+                      ]),
+                      nd.enum4,
+                    ]),
+                    Gc([
+                      fc,
+                      fc,
+                      Bc([_c(-1), _c(0), _c(1), _c(2)]),
+                      Bc([
+                        _c(-2),
+                        _c(-1),
+                        _c(-0.5),
+                        _c(0),
+                        _c(0.5),
+                        _c(1),
+                        _c(2),
+                      ]),
+                    ]),
+                  ]),
+                ),
+                Oc(
+                  Bc([
+                    Gc([fc, fc, nd.enum2, nd.enum2, nd.enum2, nd.enum2]),
+                    Gc([fc, fc, nd.enum2, nd.enum2, nd.enum2]),
+                    Gc([fc, fc, nd.enum2, nd.enum2]),
+                  ]),
+                ),
+                Oc(
+                  Bc([
+                    Gc([fc, fc, nd.enum9, nd.enum2, nd.enum2]),
+                    Gc([fc, fc, nd.enum9, nd.enum2]),
+                    Gc([fc, fc, nd.enum9]),
+                  ]),
+                ),
+                Oc(
+                  Bc([
+                    Gc([
+                      fc,
+                      fc,
+                      nd.enum6,
+                      nd.enum2,
+                      nd.enum3,
+                      nd.enum2,
+                      nd.enum2,
+                    ]),
+                    Gc([fc, fc, nd.enum6, nd.enum2, nd.enum2, nd.enum3]),
+                    Gc([fc, fc, nd.enum6, nd.enum2, nd.enum2]),
+                    Gc([fc, fc, nd.enum6, nd.enum2, nd.enum2]),
+                    Gc([fc, fc, nd.enum6, nd.enum2]),
+                    Gc([fc, fc, nd.enum6, nd.enum2]),
+                  ]),
+                ),
+                Oc(
+                  Bc([
+                    Gc([fc, fc, nd.enum6, nd.enum2, nd.enum2]),
+                    Gc([fc, fc, nd.enum6, nd.enum10]),
+                    Gc([fc, fc, nd.enum6]),
+                  ]),
+                ),
+                Oc(
+                  Bc([
+                    Gc([fc, fc, nd.enum2, nd.enum2, nd.enum4]),
+                    Gc([fc, fc, nd.enum2, nd.enum2]),
+                  ]),
+                ),
+                Oc(Gc([fc, fc, nd.enum2])),
+                Oc(Bc([Gc([fc, fc, nd.enum2]), Gc([fc, fc])])),
+                Oc(nd.tuple([fc, fc, nd.enum4, fc, nd.enum2])),
+                Oc(Gc([fc, fc, nd.enum2])),
+                Oc(Gc([fc, fc, nd.enum2, nd.enum3])),
+>>>>>>> 8740d7ccb287389ed55f3dccfd4159210feb279a
               ]),
             ),
             Oc(
@@ -50154,139 +53369,221 @@ var version = "v1.17.2";
                       ? [
                         e.x,
                         e.y,
-                        ru(e.movement, $d),
-                        e.movement == "falling"
-                          ? e.multiplier
-                          : ru(e.movementTrigger, Jd),
-                        3,
-                        e.offset / 30,
-                      ]
-                      : e.shape != "rail"
-                        ? [
-                          e.x,
-                          e.y,
-                          ru(e.movement, $d),
-                          e.movement == "falling"
-                            ? e.multiplier
-                            : ru(e.movementTrigger, Jd),
-                          e.shape == "bar" ? 3 : e.shape == "large" ? 2 : 1,
-                        ]
-                        : [
-                          e.x,
-                          e.y,
-                          ru(e.movement, $d),
-                          e.movement == "falling"
-                            ? e.multiplier
-                            : ru(e.movementTrigger, Jd),
-                        ],
-                  ),
-                  i.flags.map((e) =>
-                    e.isFlying
-                      ? [
-                        e.x,
-                        e.y,
-                        ru(e.role, Kd),
-                        ru(e.switchesOn, ou),
-                        ru(e.retainSpeed, ou),
-                        ru(e.isFlying, ou),
-                      ]
-                      : e.retainSpeed
-                        ? [
-                          e.x,
-                          e.y,
-                          ru(e.role, Kd),
-                          ru(e.switchesOn, ou),
-                          ru(e.retainSpeed, ou),
-                        ]
-                        : [e.x, e.y, ru(e.role, Kd), ru(e.switchesOn, ou)],
-                  ),
-                  i.powerups.map((e) =>
-                    !e.override
-                      ? [e.x, e.y, ru(e.item, Qd), +!e.compatible, 1]
-                      : e.compatible
-                        ? [e.x, e.y, ru(e.item, Qd)]
-                        : [e.x, e.y, ru(e.item, Qd), 1],
-                  ),
-                  i.enemies.map((e) =>
-                    !e.isCompatible
-                      ? [
-                        e.x,
-                        e.y,
-                        ru(e.kind, Zd),
-                        ru(e.giant, ou),
-                        e.skipMissiles ? 1 : 0,
-                        e.enemyDir > 0 ? 1 : 0,
-                        1,
-                      ]
-                      : e.enemyDir > 0
-                        ? [
-                          e.x,
-                          e.y,
-                          ru(e.kind, Zd),
-                          ru(e.giant, ou),
-                          e.skipMissiles ? 1 : 0,
-                          e.enemyDir > 0 ? 1 : 0,
-                        ]
-                        : e.skipMissiles
-                          ? [e.x, e.y, ru(e.kind, Zd), ru(e.giant, ou), 1]
-                          : [e.x, e.y, ru(e.kind, Zd), ru(e.giant, ou)],
-                  ),
-                  i.switchButtons.map((e) =>
-                    //console.log(clrs, e.color),
-                    e.affects == "falling"
-                      ? [e.x, e.y, ru(e.affects, eu), +e.up, +e.down]
-                      : e.affects == "gravity"
-                        ? [
-                          e.x,
-                          e.y,
-                          ru(e.affects, eu),
-                          e.gravity == 2 ? 3 : e.gravity == 0 ? 2 : e.gravity > 0 ? 0 : 1,
-                        ]
-                        : e.affects == "color"
-                          ? [e.x, e.y, ru(e.affects, eu), ru(e.color, clrs)]
-                          : [e.x, e.y, ru(e.affects, eu)],
-                  ),
-                  i.switchPlatforms.map((e) => {
-                    return e.direction != 0
-                      ? [
-                        e.x,
-                        e.y,
-                        ru(e.initPosition, au),
-                        ru(e.movementTrigger, iu),
-                        ru(e.direction, Hd),
-                      ]
-                      : [
-                        e.x,
-                        e.y,
-                        ru(e.initPosition, au),
-                        ru(e.movementTrigger, iu),
-                      ];
-                  }),
-                  i.collectibles.map((e) => [e.x, e.y, ru(e.form, su)]),
-                  i.springs.map((e) =>
-                    e.direction < 0 ? [e.x, e.y, 1] : [e.x, e.y],
-                  ),
-                  i.portals.map((e) => [
-                    e.x,
-                    e.y,
-                    ru(e.direction, qd),
-                    e.pairId,
-                    ru(e.pair, nu),
-                  ]),
-                  i.speedChanges.map((e) => [e.x, e.y, ru(e.direction, tu)]),
-                  i.blocks
-                    .filter((b) => {
-                      return !!b.init;
-                    })
-                    .map((e) => [
-                      e.x,
-                      e.y,
-                      ru(e.init == "blue", ou),
-                      ru(e.trigger, zd),
-                    ]),
-                ],
-                B.roundTo(2)(s),
-              ];
+                        ru(e.init == "blue", ou),
+                        ru(e.trigger, zd),
+                      ]),
+                  ],
+                  B.roundTo(2)(s),
+                ];
+              }),
+          }),
+          Yd = Object.assign(Object.assign({}, Fd), {
+            merge: function (e, t) {
+              return rt([
+                ...e.map((e) => e.level.id),
+                ...t.map((e) => e.level.id),
+              ]).map((a) => {
+                const i = e.find((e) => e.level.id === a),
+                  n = t.find((e) => e.level.id === a);
+                return i || n;
+              });
+            },
+          }),
+          Ud = (e, t) => (e * (t || 1)).toString(32),
+          jd = (e, t) => parseInt(e, 32) / (t || 1),
+          Gd = {
+            [xd.World1]: "world1",
+            [xd.World1Boss]: "world1Boss",
+            [xd.World1Red]: "red",
+            [xd.World2]: "world2",
+            [xd.World2Red]: "world2Red",
+            [xd.World3]: "world3",
+            [xd.World3Red]: "world3Red",
+            [xd.Synthwave]: "synthwave",
+            [xd.World4]: "world4",
+            [xd.World4Red]: "world4Red",
+            [xd.World4Boss]: "world4Boss",
+            [xd.Skater]: "skater",
+            [xd.Arrows]: "arrows",
+            [xd.Dreamy]: "dreamy",
+            [xd.Speed]: "speed",
+            [xd.Fighter]: "fighter",
+            [xd.Classic]: "classic",
+            [xd.Infinite]: "infinite",
+            [xd.Virtual]: "virtual",
+          },
+          Vd = {
+            [Nd.Dragonfly]: hl.songs.dragonfly,
+            [Nd.Solace]: hl.songs.solace,
+            [Nd.Lighthouse]: hl.songs.lighthouse,
+            [Nd.Octane]: hl.songs.octane,
+            [Nd.Stardust]: hl.songs.stardust,
+            [Nd.ThinkDifferent]: hl.songs.thinkDifferent,
+            [Nd.DarkSheep]: hl.songs.darkSheep,
+            [Nd.EightBitAdventure]: hl.songs.eightBitAdventure,
+            [Nd.Indestructable]: hl.songs.indestructable,
+            [Nd.Frontier]: hl.songs.frontier,
+            [Nd.Polymorph]: hl.songs.polymorph,
+            [Nd.Accelerated]: hl.songs.accelerated,
+            [Nd.CriticalHit]: hl.songs.criticalHit,
+            [Nd.SkyFracture]: hl.songs.skyFracture,
+            [Nd.Breathe]: hl.songs.breathe,
+            [Nd.Blythe]: hl.songs.blythe,
+            [Nd.Awake]: hl.songs.awake,
+            [Nd.Coincidence]: hl.songs.coincidence,
+            [Nd.Mutant]: hl.songs.mutant,
+            [Nd.ChaozFantasy]: hl.songs.chaozFantasy,
+            [Nd.Overdrive]: hl.songs.overdrive,
+            [Nd.Cloud9]: hl.songs.cloud9,
+            [Nd.ForYou]: hl.songs.forYou,
+            [Nd.Aura]: hl.songs.aura,
+            [Nd.CoolFriends]: hl.songs.coolFriends,
+            [Nd.NacreousSnowmelt]: hl.songs.nacreousSnowmelt,
+            [Nd.FireAura]: hl.songs.fireAura,
+            [Nd.Heaven]: hl.songs.heaven,
+            [Nd.Phazd]: hl.songs.phazd,
+            [Nd.Virtual]: hl.songs.virtual,
+            [Nd.SolarAbyss]: hl.songs.solarAbyss,
+            [Nd.Toe3]: hl.songs.toe3,
+            [Nd.Silverdust]: hl.songs.silverdust,
+            [Nd.Truecolors]: hl.songs.truecolors,
+            [Nd.Soulless2]: hl.songs.soulless2,
+            [Nd.PirateManners]: hl.songs.piratemanners,
+            [Nd.EightBitShuffle]: hl.songs.eightBitShuffle,
+            [Nd.FinalTheory]: hl.songs.finalTheory,
+            [Nd.SuperUltra]: hl.songs.superUltra,
+            [Nd.Rummy]: hl.songs.rummy,
+            [Nd.Daydreamer]: hl.songs.daydreamer,
+            [Nd.OrientalSwing]: hl.songs.orientalSwing,
+            [Nd.RedShift]: hl.songs.redShift,
+            [Nd.RaceAroundTheWorld]: hl.songs.raceAroundTheWorld,
+            [Nd.Machina]: hl.songs.machina,
+            [Nd.Clutterfunk]: hl.songs.clutterfunk,
+            [Nd.Soulless4]: hl.songs.soulless4,
+            [Nd.Zenith]: hl.songs.zenith,
+            [Nd.Color]: hl.songs.color,
+            [Nd.FunkyPunky]: hl.songs.funkyPunky,
+            [Nd.OctaneExtended]: hl.songs.octaneExtended,
+            [Nd.CriticalHitExtended]: hl.songs.criticalHitExtended,
+            [Nd.MindsOfTheMad]: hl.songs.mindsOfTheMad,
+            [Nd.Electrodynamix]: hl.songs.electrodynamix,
+            [Nd.SkyFractureExtended]: hl.songs.skyFractureExtended,
+            [Nd.Plummet]: hl.songs.plummet,
+            [Nd.SolarWind]: hl.songs.solarWind,
+            [Nd.GlitchedOut]: hl.songs.glitchedOut,
+            [Nd.LastTile]: hl.songs.lastTile,
+            [Nd.Hellidox]: hl.songs.hellidox,
+            [Nd.Jackpot]: hl.songs.jackpot,
+            [Nd.Carnival]: hl.songs.carnival,
+            [Nd.RobotLanguage]: hl.songs.robotLanguage,
+            [Nd.DryOut]: hl.songs.dryOut,
+            [Nd.Carnivores]: hl.songs.carnivores,
+            [Nd.Phobos]: hl.songs.phobos,
+            [Nd.RockinThatBass]: hl.songs.rockinThatBass,
+            [Nd.MilkyWays]: hl.songs.milkyWays,
+            [Nd.ParadiseOnE]: hl.songs.paradiseOnE,
+            [Nd.Rattlesnake]: hl.songs.rattlesnake,
+          },
+          Hd = {
+            [ld.Rot0]: 0,
+            [ld.Rot90]: 90,
+            [ld.Rot180]: 180,
+            [ld.Rot270]: 270,
+          },
+          Xd = {
+            [cd.Static]: "static",
+            [cd.UpDown]: "upDown",
+            [cd.DownUp]: "downUp",
+            [cd.Falling]: "falling",
+            [cd.Rail]: "rail",
+          },
+          zd = { [dd.Beat]: "beat", [dd.Jump]: "jump", [dd.Switch]: "switch" },
+          Wd = { [ud.Left]: "left", [ud.Right]: "right" },
+          multUse = { [usage.SingleUse]: false, [usage.MultiUse]: true },
+          qd = {
+            [Sd.Left]: "left",
+            [Sd.Right]: "right",
+            [Sd.Up]: "up",
+            [Sd.Down]: "down",
+          },
+          $d = {
+            [hd.Static]: "static",
+            [hd.UpDown]: "upDown",
+            [hd.DownUp]: "downUp",
+            [hd.Falling]: "falling",
+          },
+          Jd = { [pd.Beat]: "beat", [pd.Jump]: "jump", [pd.Switch]: "switch" },
+          shapes = { 0: "rail", 1: "small", 2: "large" },
+          Kd = { [gd.Checkpoint]: "checkpoint", [gd.EndOfLevel]: "endOfLevel" },
+          Qd = {
+            [Cd.Gun]: "gun",
+            [Cd.DoubleJump]: "doubleJump",
+            [Cd.Jetpack]: "jetpack",
+            [Cd.PlayerStack]: "playerStack",
+            [Cd.Skateboard]: "skateboard",
+            [Cd.Punch]: "punch",
+            [Cd.Drill]: "drill",
+            [Cd.Ghost]: "ghost",
+            [Cd.Spaceship]: "spaceship",
+          },
+          Zd = {
+            [fd.Shooter]: "shooter",
+            [fd.Walker]: "walker",
+            [fd.WalkerHelmet]: "walkerHelmet",
+            [fd.Bomb]: "bomb",
+            [fd.Minion]: "minion",
+            [fd.Fireball]: "fireball",
+          },
+          eu = {
+            [wd.Movement]: "movement",
+            [wd.BlockSpike]: "blockSpike",
+            [wd.Size]: "size",
+            [wd.Color]: "color",
+            [wd.Gravity]: "gravity",
+            [wd.Falling]: "falling",
+          },
+          clrs = {
+            [clrs2.Red]: "red",
+            [clrs2.Yellow]: "yellow",
+            [clrs2.Green]: "green",
+            [clrs2.Cyan]: "cyan",
+            [clrs2.Blue]: "blue",
+            [clrs2.Violet]: "violet",
+            [clrs2.Pink]: "pink",
+            [clrs2.Black]: "black",
+            [clrs2.White]: "white",
+            [clrs2.Flash]: "flash",
+          },
+          tu = { [kd.Left]: "left", [kd.Right]: "right" },
+          au = { [yd.Up]: "up", [yd.Right]: "right" },
+          iu = { [Ed.Switch]: "switch", [Ed.Jump]: "jump" },
+          nu = { [bd.A]: "a", [bd.B]: "b" },
+          su = { [Ad.Coin]: "coin", [Ad.Arrows]: "arrow" },
+          ou = { [sd.True]: true, [sd.False]: false };
+        function ru(e, t) {
+          return Number(Object.entries(t).find(([, t]) => t === e)[0]);
+        }
+        const lu = xc({ x: fc, y: fc, offsetX: fc, offsetY: fc }),
+          cu = Uc([
+            kc({
+              type: _c("powerup"),
+              array: _c("powerups"),
+              x: fc,
+              y: fc,
+              width: fc,
+              height: fc,
+              item: Bc([
+                _c("gun"),
+                _c("doubleJump"),
+                _c("jetpack"),
+                _c("playerStack"),
+                _c("skateboard"),
+                _c("punch"),
+                _c("drill"),
+                _c("ghost"),
+                _c("spaceship"),
+              ]),
+>>>>>>> 8740d7ccb287389ed55f3dccfd4159210feb279a
             }),
         }),
         Yd = Object.assign(Object.assign({}, Fd), {
@@ -63594,7 +66891,559 @@ var version = "v1.17.2";
                 : Array.from({ length: 3 }).map((e, t) => 170 * (t - 1)),
             showSettings: false,
           }),
-          render({ props: e, state: t, device: a }) {
+          Dm = makeSprite({
+            render: ({ props: e }) => [
+              m(
+                {
+                  thickness: 4,
+                  color: Ye,
+                  lineCap: "round",
+                  path: [
+                    [-80, 50],
+                    [-50, 80],
+                    [80, 80],
+                    [80, -50],
+                    [50, -80],
+                    [-80, -80],
+                    [-80, 50],
+                  ],
+                },
+                (t) => {
+                  t.fillColor = e.isBeingUsed ? Ye : void 0;
+                },
+              ),
+              Yo.Single(
+                {
+                  text: localize(e.name),
+                  disabled: e.disable || e.isBeingUsed || 0 === e.numBooster,
+                  width: 140,
+                  height: 60,
+                  onPress: () => {
+                    e.onUseBooster();
+                  },
+                  y: 20,
+                },
+                (t) => {
+                  t.disabled = e.disable || e.isBeingUsed || 0 === e.numBooster;
+                },
+              ),
+              conditional(
+                () => e.isBeingUsed,
+                () => [
+                  Yo.Single({
+                    text: "CANCEL",
+                    width: 100,
+                    height: 40,
+                    onPress: () => {
+                      e.onCancelBooster();
+                    },
+                    y: -40,
+                  }),
+                ],
+                () => [
+                  ifConditional(
+                    () => !e.disable,
+                    () => [
+                      conditional(
+                        () => 0 === e.numBooster,
+                        () => [
+                          Yo.Single({
+                            text: "+",
+                            fontSize: 30,
+                            width: 40,
+                            height: 40,
+                            onPress: () => {
+                              e.onAddBooster();
+                            },
+                            y: -40,
+                          }),
+                        ],
+                        () => [
+                          c(
+                            {
+                              text: `x${e.numBooster}`,
+                              font: { size: 20 },
+                              color: Re,
+                              strokeColor: Ye,
+                              strokeThickness: 4,
+                              y: -40,
+                            },
+                            (t) => {
+                              t.text = `x${e.numBooster}`;
+                            },
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          }),
+          Bm = makeSprite({
+            init({ props: e, device: t, getState: a, getContext: i }) {
+              const { online: n } = i(Se);
+              return (
+                n &&
+                  bp
+                    .getBuyableItems(n.backend, e.booster.type)
+                    .then((e) => {
+                      a().items = e;
+                    })
+                    .catch((a) => {
+                      t.alert.ok(
+                        `Couldn't retrieve items from store: ${a.message}`,
+                        () => {
+                          e.closeMenu();
+                        },
+                      );
+                    }),
+                {
+                  items: "loading",
+                  showBuyBlocksModal: null,
+                  isPurchasing: false,
+                }
+              );
+            },
+            render: ({ props: e, state: t, device: a, getContext: i }) => [
+              _e.Single({
+                onPressOutside: e.closeMenu,
+                width: 600,
+                height: 320,
+                sprites: () => [],
+                onPress: () => null,
+              }),
+              qe({
+                width: 600,
+                height: 320,
+                fillColor: ve,
+                color: Ye,
+                thickness: 8,
+              }),
+              Yo.Single({
+                text: "X",
+                x: 300,
+                y: 160,
+                width: 40,
+                height: 40,
+                onPress: e.closeMenu,
+                strokeColor: Ye,
+              }),
+              conditional(
+                () => null === i(Se).online,
+                () => [
+                  c({
+                    text: localize("CONNECT ONLINE TO BUY BOOSTERS"),
+                    color: Ye,
+                  }),
+                  vm.Single({ y: -50 }),
+                ],
+                () => {
+                  const n = (i, n) => {
+                    bp.buyItem(n.backend, i)
+                      .then(({ balance: t, item: i }) => {
+                        if (
+                          (n.updateBlocksBalance(t), "boosterItem" === i.type)
+                        )
+                          return (
+                            e.addItem(i),
+                            a.audio("audio/global/purchase-item.wav").play(),
+                            Jp.addPurchasedItems([i], a.now)
+                          );
+                      })
+                      .then(() => {
+                        e.closeMenu();
+                      })
+                      .catch((e) => {
+                        a.alert.ok(`Error buying item: ${e.message}`);
+                      })
+                      .finally(() => {
+                        t.isPurchasing = false;
+                      });
+                  };
+                  return [
+                    c(
+                      {
+                        color: ve,
+                        strokeColor: Ye,
+                        font: { size: 15 },
+                        strokeThickness: 6,
+                        x: 200,
+                        y: 50,
+                      },
+                      (e) => {
+                        const { blocksBalance: t } = i(Se).online;
+                        e.text = `BLOCKS: ${t}`;
+                      },
+                    ),
+                    ...(zu.hasIAP()
+                      ? [
+                          Yo.Single({
+                            text: "+",
+                            fontSize: 30,
+                            width: 60,
+                            height: 60,
+                            onPress: () => {
+                              t.showBuyBlocksModal = {};
+                            },
+                            x: 210,
+                            strokeColor: Ye,
+                            textColor: ve,
+                            textStroke: Ye,
+                            textStrokeThickness: 6,
+                          }),
+                        ]
+                      : [
+                          c({
+                            font: { size: 14 },
+                            text: "GET ACHIEVEMENTS",
+                            color: Me,
+                            x: 210,
+                            y: 0,
+                          }),
+                          c({
+                            font: { size: 14 },
+                            text: "TO EARN",
+                            color: Me,
+                            x: 210,
+                            y: -20,
+                          }),
+                          c({
+                            font: { size: 14 },
+                            text: "MORE BLOCKS",
+                            color: Me,
+                            x: 210,
+                            y: -40,
+                          }),
+                        ]),
+                    conditional(
+                      () => "loading" === t.items,
+                      () => [
+                        c({
+                          text: `${localize("LOADING")}...`,
+                          font: { size: 20 },
+                          color: Ye,
+                        }),
+                      ],
+                      () => [
+                        conditional(
+                          () => t.isPurchasing,
+                          () => [
+                            c({
+                              text: `${localize("PURCHASING")}...`,
+                              font: { size: 20 },
+                              color: Ye,
+                            }),
+                          ],
+                          () => [
+                            d({
+                              props: (e, t) => ({
+                                font: { size: 18 },
+                                x: -150,
+                                color: ve,
+                                strokeColor: Ye,
+                                strokeThickness: 4,
+                                text: e.name,
+                                y: 80 - 80 * t,
+                              }),
+                              array: () => t.items,
+                            }),
+                            Yo.Array({
+                              props: (e, a) => ({
+                                text: `${e.blocksPrice} BLOCKS`,
+                                strokeColor: Ye,
+                                textColor: ve,
+                                textStroke: Ye,
+                                textStrokeThickness: 5,
+                                width: 130,
+                                height: 50,
+                                onPress: () => {
+                                  const a = i(Se).online;
+                                  ((t.isPurchasing = true),
+                                    e.blocksPrice > a.blocksBalance
+                                      ? (t.showBuyBlocksModal = {
+                                          buyItemOnComplete: e,
+                                        })
+                                      : n(e, a));
+                                },
+                                x: 50,
+                                y: 80 - 80 * a,
+                              }),
+                              key: (e, t) => t,
+                              array: () => t.items,
+                            }),
+                          ],
+                        ),
+                      ],
+                    ),
+                    ifConditional(
+                      () => null !== t.showBuyBlocksModal,
+                      () => [
+                        Sm.Single({
+                          onModalClose: () => {
+                            ((t.showBuyBlocksModal = null),
+                              (t.isPurchasing = false));
+                          },
+                          onPurchaseComplete: (e) => {
+                            const a = i(Se).online,
+                              { buyItemOnComplete: s } = t.showBuyBlocksModal;
+                            (s && e >= s.blocksPrice && n(s, a),
+                              a.updateBlocksBalance(e),
+                              (t.showBuyBlocksModal = null));
+                          },
+                        }),
+                      ],
+                    ),
+                  ];
+                },
+              ),
+            ],
+          }),
+          Fm = makeSprite({
+            init: () => ({ arrowY: 0 }),
+            loop({ state: e }) {
+              ((e.arrowY += 0.3), e.arrowY > 10 && (e.arrowY = -10));
+            },
+            render: ({ state: e }) => [
+              c({
+                text: localize("STUCK? TRY A BOOSTER"),
+                color: "white",
+                font: { align: "right", size: 14 },
+                x: -15,
+              }),
+              y(
+                { fileName: "images/level/arrow-up.png", width: 14, height: 8 },
+                (t) => {
+                  t.y = -5 + Math.abs(e.arrowY);
+                },
+              ),
+            ],
+          }),
+          Ym = JSON.parse(
+            '{"75":1,"81":0,"186":1,"193":0,"303":1,"313":0,"332":1,"339":0,"440":1,"449":0,"548":1,"559":0,"612":1,"676":0,"717":1,"727":0,"775":1,"784":0,"881":1,"968":0,"1051":1,"1061":0,"1133":1,"1142":0,"1187":1,"1195":0,"1215":1,"1280":0,"1327":1,"1337":0,"1370":1,"1378":0,"1443":1,"1452":0,"1497":1,"1504":0,"1553":1,"1621":0,"1660":1,"1671":0,"1773":1,"1859":0,"2042":1,"2051":0,"2125":1,"2133":0,"2180":1,"2187":0,"2238":1,"2247":0,"2276":1,"2284":0,"2337":1,"2344":0,"2389":1,"2396":0,"2422":1,"2429":0,"2472":1,"2480":0,"2527":1,"2535":0,"2725":1,"2837":0,"2897":1,"2904":0,"2939":1,"2948":0,"3005":1,"3013":0,"3060":1,"3068":0,"3089":1,"3296":0,"3338":1,"3346":0,"3409":1,"3416":0,"3510":1,"3518":0,"3685":1,"3692":0,"3802":1,"3810":0,"3833":1,"3843":0,"3863":1,"3873":0,"3913":1,"3921":0,"4010":1,"4017":0,"4093":1,"4101":0,"4136":1,"4143":0,"4166":1,"4177":0,"4240":1,"4247":0,"4308":1,"4314":0,"4348":1,"4356":0,"4373":1,"4380":0,"4501":1,"4512":0,"4608":1,"4615":0,"4699":1,"4737":0,"4833":1,"4842":0,"4944":1,"4952":0,"5043":1,"5048":0,"5129":1,"5138":0,"5165":1,"5173":0,"5252":1,"5260":0,"5284":1,"5291":0,"5387":1,"5397":0,"5489":1,"5496":0,"5539":1,"5577":0,"5606":1,"5615":0,"5711":1,"5719":0,"5753":1,"5817":0,"5838":1,"5848":0,"5929":1,"5963":0,"6043":1,"6054":0,"6128":1,"6137":0,"6203":1,"6594":0,"6840":1,"6849":0,"6869":1,"6957":0,"7054":1,"7064":0,"7184":1,"7192":0,"7233":1,"7242":0,"7287":1,"7295":0,"7348":1,"7356":0,"7438":1,"7443":0,"7496":1,"7504":0,"7528":1,"7536":0,"7623":1,"7659":0,"7686":1,"7748":0,"7799":1,"7809":0,"7864":1,"7928":0,"8006":1,"8093":0,"8126":1,"8136":0,"8257":1,"8266":0,"8290":1,"8299":0,"8348":1,"8359":0,"8460":1,"8519":0,"8558":1,"8567":0,"8604":1,"8616":0,"8664":1,"8672":0}',
+          ),
+          Um = JSON.parse(
+            '{"113":1,"120":0,"196":1,"204":0,"227":1,"236":0,"354":1,"363":0,"456":1,"466":0,"476":1,"486":0,"728":1,"736":0,"859":1,"865":0,"953":1,"961":0,"976":1,"986":0,"1112":1,"1120":0,"1211":1,"1219":0,"1267":1,"1277":0,"1308":1,"1317":0,"1347":1,"1357":0,"1601":1,"1609":0,"1659":1,"1668":0,"1720":1,"1730":0,"1814":1,"1851":0,"1904":1,"1913":0,"1981":1,"1989":0,"2027":1,"2035":0,"2157":1,"2164":0,"2172":1,"2181":0,"2221":1,"2229":0,"2268":1,"2278":0,"2298":1,"2309":0,"2361":1,"2370":0,"2443":1,"2450":0,"2472":1,"2481":0,"2502":1,"2511":0,"2541":1,"2549":0,"2572":1,"2582":0,"2602":1,"2613":0,"2661":1,"2669":0,"2694":1,"2706":0,"2735":1,"2797":0,"2819":1,"2831":0,"2846":1,"2858":0,"2875":1,"2885":0,"2937":1,"2947":0,"2993":1,"3001":0,"3020":1,"3029":0,"3093":1,"3102":0,"3129":1,"3229":0,"3286":1,"3295":0,"3316":1,"3325":0,"3357":1,"3366":0,"3389":1,"3400":0,"3444":1,"3454":0,"3475":1,"3483":0,"3503":1,"3516":0,"3539":1,"3550":0,"3605":1,"3614":0,"3694":1,"3705":0,"3760":1,"3768":0,"3856":1,"3988":0,"4127":1,"4135":0,"4158":1,"4170":0,"4192":1,"4201":0,"4225":1,"4236":0,"4286":1,"4295":0,"4341":1,"4353":0,"4372":1,"4382":0,"4431":1,"4440":0,"4494":1,"4504":0,"4520":1,"4532":0,"4560":1,"4571":0,"4611":1,"4621":0,"4728":1,"4737":0,"4755":1,"4765":0,"4844":1,"4853":0,"4887":1,"4896":0,"4947":1,"4956":0,"4969":1,"4980":0,"5017":1,"5025":0,"5062":1,"5073":0,"5097":1,"5109":0,"5159":1,"5174":0,"5198":1,"5207":0,"5232":1,"5241":0,"5261":1,"5269":0,"5294":1,"5303":0,"5325":1,"5334":0,"5356":1,"5366":0,"5386":1,"5396":0,"5418":1,"5429":0,"5447":1,"5518":0,"5544":1,"5555":0,"5638":1,"5646":0,"5670":1,"5680":0,"5700":1,"5711":0,"5755":1,"5766":0,"5788":1,"5800":0,"5823":1,"5838":0,"5853":1,"5868":0,"5880":1,"5895":0,"5912":1,"5925":0,"5973":1,"5982":0,"5994":1,"6004":0,"6067":1,"6076":0,"6083":1,"6094":0,"6170":1,"6185":0,"6203":1,"6214":0,"6258":1,"6267":0,"6328":1,"6338":0,"6380":1,"6389":0,"6449":1,"6457":0,"6499":1,"6508":0,"6544":1,"6551":0,"6558":1,"6567":0,"6578":1,"6589":0,"6669":1,"6677":0,"6710":1,"6718":0,"6823":1,"6833":0,"6858":1,"6869":0,"7012":1,"7021":0,"7070":1,"7079":0,"7089":1,"7100":0,"7139":1,"7207":0,"7234":1,"7245":0,"7262":1,"7274":0,"7297":1,"7308":0,"7328":1,"7347":0,"7363":1,"7375":0,"7396":1,"7406":0,"7437":1,"7447":0,"7471":1,"7480":0,"7529":1,"7537":0,"7638":1,"7649":0,"7674":1,"7684":0,"7707":1,"7717":0,"7738":1,"7748":0,"7766":1,"7776":0,"7799":1,"7810":0,"7829":1,"7841":0,"7876":1,"7885":0,"8012":1,"8022":0,"8044":1,"8053":0,"8076":1,"8086":0,"8128":1,"8139":0,"8170":1,"8182":0,"8203":1,"8214":0,"8236":1,"8248":0,"8270":1,"8280":0,"8301":1,"8311":0,"8331":1,"8341":0,"8360":1,"8371":0,"8394":1,"8402":0,"8423":1,"8433":0,"8452":1,"8464":0,"8486":1,"8497":0,"8533":1,"8543":0,"8573":1,"8582":0}',
+          ),
+          jm = JSON.parse(
+            '{"61":1,"70":0,"112":1,"121":0,"168":1,"175":0,"221":1,"229":0,"282":1,"290":0,"325":1,"333":0,"390":1,"399":0,"473":1,"481":0,"523":1,"529":0,"580":1,"588":0,"628":1,"636":0,"930":1,"940":0,"973":1,"982":0,"1100":1,"1109":0,"1240":1,"1250":0,"1328":1,"1340":0,"1409":1,"1416":1,"1422":0,"1424":0,"1463":1,"1473":0,"1518":1,"1529":0,"1789":1,"1801":0,"1950":1,"1957":0,"1987":1,"1995":0,"2031":1,"2038":0,"2099":1,"2109":0,"2147":1,"2156":0,"2214":1,"2225":0,"2266":1,"2277":0,"2332":1,"2340":1,"2342":0,"2347":0,"2381":1,"2393":0,"2436":1,"2444":0,"2596":1,"2611":0,"2642":1,"2652":0,"2678":1,"2687":0,"2731":1,"2739":0,"2810":1,"2820":0,"3050":1,"3064":0,"3083":1,"3125":0,"3395":1,"3407":0,"3426":1,"3438":0,"3465":1,"3475":0,"3513":1,"3522":0,"3660":1,"3672":0,"3695":1,"3707":0,"3739":1,"3749":0,"3995":1,"4005":0,"4079":1,"4088":0,"4259":1,"4268":0,"4322":1,"4333":0,"4415":1,"4423":0,"4474":1,"4480":0,"4500":1,"4513":0,"4756":1,"4766":0,"4804":1,"4815":0,"4850":1,"4859":0,"4921":1,"4950":0,"4977":1,"4997":0,"5150":1,"5160":0}',
+          ),
+          Gm = JSON.parse(
+            '{"71":1,"77":0,"167":1,"174":0,"277":1,"285":0,"356":1,"365":0,"396":1,"409":0,"460":1,"469":0,"543":1,"551":0,"591":1,"599":0,"633":1,"640":0,"698":1,"705":0,"727":1,"734":0,"779":1,"788":0,"828":1,"835":0,"859":1,"867":0,"896":1,"904":0,"990":1,"997":0,"1041":1,"1104":0,"1138":1,"1149":0,"1203":1,"1212":0,"1229":1,"1238":0,"1260":1,"1267":0,"1292":1,"1332":0,"1376":1,"1387":0,"1406":1,"1414":0,"1426":1,"1438":0,"1461":1,"1469":0,"1514":1,"1524":0,"1543":1,"1550":0,"1568":1,"1578":0,"1633":1,"1641":0,"1728":1,"1735":0,"1759":1,"1765":0,"1785":1,"1792":0,"1858":1,"1866":0,"1925":1,"1932":0,"1961":1,"1972":0,"2019":1,"2027":0,"2087":1,"2096":0,"2126":1,"2133":0,"2153":1,"2164":0,"2243":1,"2251":0,"2369":1,"2374":0,"2445":1,"2456":0,"2500":1,"2507":0,"2512":1,"2518":0,"2554":1,"2561":0,"2611":1,"2620":0,"2662":1,"2674":0,"2741":1,"2750":0,"2828":1,"2838":0,"2880":1,"2890":0,"2929":1,"2937":0,"2963":1,"2971":0,"3021":1,"3031":0,"3048":1,"3056":0,"3080":1,"3090":0,"3148":1,"3156":0,"3198":1,"3206":0,"3277":1,"3285":0,"3337":1,"3346":0,"3386":1,"3396":0,"3425":1,"3435":0,"3460":1,"3468":0,"3502":1,"3511":0,"3535":1,"3543":0,"3674":1,"3681":0,"3699":1,"3707":0,"3721":1,"3729":0,"3757":1,"3766":0,"3884":1,"3889":0,"3894":0,"3917":1,"3925":0,"3941":1,"3949":0,"3973":1,"3979":0,"4003":1,"4013":0,"4020":1,"4029":0,"4111":1,"4118":0,"4146":1,"4157":0,"4253":1,"4260":0,"4302":1,"4309":0,"4332":1,"4343":0,"4371":1,"4380":0,"4405":1,"4413":0,"4455":1,"4468":0,"4523":1,"4530":0,"4692":1,"4700":0,"4727":1,"4735":0,"4768":1,"4775":0,"4793":1,"4801":0,"4833":1,"4839":0,"4895":1,"4902":0,"5078":1,"5084":0,"5160":1,"5189":0,"5243":1,"5250":0,"5302":1,"5309":0,"5355":1,"5364":0,"5417":1,"5424":0,"5464":1,"5472":0,"5529":1,"5539":0,"5669":1,"5676":0,"5709":0,"5787":1,"5795":0,"5878":1,"5886":0,"5991":1,"5998":0,"6040":1,"6048":0,"6107":1,"6115":0,"6221":1,"6232":0,"6280":1,"6288":0,"6337":1,"6344":0,"6433":1,"6442":0,"6494":1,"6529":0,"6612":1,"6621":0,"6643":1,"6652":0,"6685":1,"6694":0,"6715":1,"6723":0,"6757":1,"6771":0,"6819":1,"6827":0,"6851":1,"6859":0,"6878":1,"6886":0,"6911":1,"6923":0,"6947":1,"6956":0,"6991":1,"6999":0,"7017":1,"7025":0,"7078":1,"7086":0,"7142":1,"7148":0,"7159":1,"7171":0,"7219":1,"7230":0,"7247":1,"7309":0,"7373":1,"7382":0,"7439":1,"7447":0,"7484":1,"7492":0,"7511":1,"7519":0,"7588":1,"7595":0,"7640":1,"7648":0,"7676":1,"7685":0,"7703":1,"7713":0,"7736":1,"7741":0,"7747":1,"7753":0,"7759":1,"7772":0,"7875":1,"7881":0,"7972":1,"7979":0,"7988":1,"7995":0,"8134":1,"8143":0,"8156":1,"8166":0}',
+          ),
+          Vm = JSON.parse(
+            '{"85":1,"91":0,"172":1,"182":0,"230":1,"238":0,"284":1,"292":0,"361":1,"369":0,"414":1,"423":0,"445":1,"455":0,"519":1,"527":0,"600":1,"607":0,"664":1,"673":0,"721":1,"731":0,"755":1,"765":0,"858":1,"868":0,"1006":1,"1037":0,"1129":1,"1138":0,"1227":1,"1235":0,"1371":1,"1420":0,"1450":1,"1459":0,"1494":1,"1502":0,"1628":1,"1636":0,"1682":1,"1690":0,"1758":1,"1767":0,"1828":1,"1837":0,"1860":1,"1870":0,"1892":1,"1924":0,"1980":1,"1988":0,"2008":1,"2017":0,"2067":1,"2076":0,"2102":1,"2109":0,"2153":1,"2163":0,"2185":1,"2194":0,"2219":1,"2230":0,"2250":1,"2283":0,"2349":1,"2399":0,"2448":1,"2473":0,"2540":1,"2550":0,"2578":1,"2588":0,"2617":1,"2628":0,"2703":1,"2712":0,"2783":1,"2792":0,"2837":1,"2846":0,"2918":1,"2928":0,"2993":1,"3003":0,"3033":1,"3043":0,"3171":1,"3344":0,"3376":1,"3384":0,"3413":1,"3421":0,"3450":1,"3473":0,"3488":1,"3495":0,"3550":1,"3559":0,"3610":1,"3619":0,"3691":1,"3700":0,"3725":1,"3735":0,"3759":1,"3767":0,"3869":1,"3924":0,"3998":1,"4008":0,"4074":1,"4083":0,"4139":1,"4148":0,"4198":1,"4208":0,"4281":1,"4330":0,"4372":1,"4381":0,"4459":1,"4467":0,"4703":1,"4712":0,"4740":1,"4750":0,"4774":1,"4783":0,"4842":1,"4851":0,"4890":1,"4899":0,"4923":1,"4931":0,"4955":1,"4964":0,"5003":1,"5013":0,"5079":1,"5088":0,"5111":1,"5120":0,"5143":1,"5152":0,"5226":1,"5235":0,"5278":1,"5350":0,"5403":1,"5458":0,"5476":1,"5506":0,"5536":1,"5546":0,"5611":1,"5640":0,"5676":1,"5685":0,"5725":1,"5734":0,"5775":1,"5787":0,"5838":1,"5850":0,"5918":1,"5928":0,"6001":1,"6011":0,"6037":1,"6047":0,"6083":1,"6092":0,"6136":1,"6145":0,"6177":1,"6186":0,"6281":1,"6291":0,"6316":1,"6323":0,"6349":1,"6359":0,"6403":1,"6582":0,"6727":1,"6943":0,"7032":1,"7041":0,"7154":1,"7184":0,"7293":1,"7302":0,"7447":1,"7453":0,"7489":1,"7497":0,"7535":1,"7543":0,"7563":1,"7570":0,"7586":1,"7596":0,"7635":1,"7644":0,"7656":1,"7666":0,"7760":1,"7769":0,"7801":1,"7811":0,"7857":1,"7866":0,"7909":1,"7918":0,"7963":1,"7972":0,"8015":1,"8024":0,"8062":1,"8071":0,"8093":1,"8102":0,"8149":1,"8157":0,"8174":1,"8301":0,"8344":1,"8352":0,"8543":1,"8891":0,"8927":1,"8941":0,"8947":1,"9195":0,"9235":1,"9244":0,"9292":1,"9301":0,"9329":1,"9337":0,"9378":1,"9387":0,"9412":1,"9420":0,"9463":1,"9473":0,"9491":1,"9500":0,"9550":1,"9777":0,"9818":1,"9879":0}',
+          ),
+          Hm = JSON.parse(
+            '{"76":1,"84":0,"97":1,"105":0,"138":1,"145":0,"173":1,"181":0,"195":1,"203":0,"236":1,"244":0,"270":1,"299":0,"362":1,"370":0,"406":1,"411":0,"436":1,"442":0,"460":1,"466":0,"484":1,"491":0,"531":1,"537":0,"553":1,"558":0,"579":1,"584":0,"614":1,"620":0,"654":1,"688":0,"722":1,"728":0,"739":1,"753":0,"796":1,"832":0,"863":1,"872":0,"917":1,"923":0,"980":1,"988":0,"1003":1,"1011":0,"1040":1,"1046":0,"1071":1,"1076":0,"1085":1,"1093":0,"1107":1,"1115":0,"1130":1,"1139":0,"1165":1,"1173":0,"1205":1,"1214":0,"1252":1,"1260":0,"1282":1,"1289":0,"1320":1,"1328":0,"1371":1,"1402":0,"1423":1,"1432":0,"1452":1,"1461":0,"1493":1,"1500":0,"1513":1,"1521":0,"1563":1,"1571":0,"1584":1,"1594":0,"1635":1,"1642":0,"1648":1,"1657":0,"1682":1,"1690":0,"1706":1,"1714":0,"1734":1,"1742":0,"1759":1,"1767":0,"1781":1,"1788":0,"1804":1,"1811":0,"1860":1,"1908":0,"1948":1,"1955":0,"1971":1,"1978":0,"2021":1,"2028":0,"2044":1,"2051":0,"2067":1,"2073":0,"2092":1,"2105":0,"2118":1,"2124":0,"2153":1,"2159":0,"2189":1,"2196":0,"2210":1,"2217":0,"2231":1,"2245":0,"2260":1,"2266":0,"2279":1,"2285":0,"2340":1,"2345":0,"2375":1,"2380":0,"2411":1,"2419":0,"2447":1,"2453":0,"2475":1,"2480":0,"2507":1,"2534":0,"2552":1,"2562":0,"2573":1,"2582":0,"2609":1,"2616":0,"2648":1,"2654":0,"2667":1,"2675":0,"2695":1,"2701":0,"2723":1,"2728":0,"2741":1,"2749":0,"2789":1,"2794":0,"2813":1,"2819":0,"2831":1,"2839":0,"2855":1,"2862":0,"2909":1,"2919":0,"2931":1,"2941":0,"2955":1,"2964":0,"2979":1,"2986":0,"3029":1,"3035":0,"3040":1,"3046":0,"3059":1,"3067":0,"3108":1,"3115":0,"3130":1,"3138":0,"3153":1,"3161":0,"3169":1,"3175":0,"3194":1,"3202":0,"3226":1,"3233":0,"3247":1,"3254":0,"3292":1,"3299":0,"3316":1,"3322":0,"3346":1,"3354":0,"3362":1,"3370":0,"3396":1,"3402":0,"3416":1,"3423":0,"3447":1,"3452":0,"3460":1,"3467":0,"3484":1,"3490":0,"3509":1,"3513":0,"3532":1,"3538":0,"3556":1,"3562":0,"3581":1,"3587":0,"3602":1,"3608":0,"3627":1,"3634":0,"3649":1,"3655":0,"3660":1,"3665":0,"3670":1,"3675":0,"3681":1,"3686":0,"3692":1,"3698":0,"3704":1,"3709":0,"3716":1,"3721":0,"3728":1,"3733":0,"3740":1,"3747":0,"3840":1,"3845":0,"3860":1,"3874":0,"3886":1,"3894":0,"3914":1,"3923":0,"3940":1,"3948":0,"3976":1,"3983":0,"4029":1,"4036":0,"4048":1,"4060":0,"4069":1,"4081":0,"4103":1,"4111":0,"4136":1,"4192":0,"4254":1,"4260":0,"4297":1,"4304":0,"4337":1,"4344":0,"4370":1,"4376":0,"4393":1,"4401":0,"4419":1,"4426":0,"4447":1,"4453":0,"4479":1,"4487":0,"4513":1,"4519":0,"4536":1,"4543":0,"4559":1,"4567":0,"4583":1,"4591":0,"4631":1,"4637":0,"4652":1,"4660":0,"4679":1,"4684":0,"4708":1,"4714":0,"4725":1,"4732":0,"4753":1,"4761":0,"4769":1,"4775":0,"4784":1,"4791":0,"4823":1,"4829":0,"4851":1,"4875":0,"4889":1,"4895":0,"4912":1,"4918":0,"4931":1,"4939":0,"4969":1,"4977":0,"4991":1,"4998":0,"5020":1,"5026":0,"5043":1,"5056":0,"5062":1,"5070":0,"5089":1,"5096":0,"5121":1,"5128":0,"5150":1,"5155":0,"5176":1,"5184":0,"5229":1,"5237":0,"5252":1,"5259":0,"5264":1,"5278":0,"5305":1,"5312":0,"5333":1,"5342":0,"5352":1,"5360":0,"5399":1,"5404":0,"5430":1,"5436":0,"5465":1,"5471":0,"5491":1,"5497":0,"5517":1,"5527":0,"5550":1,"5558":0,"5574":1,"5580":0,"5594":1,"5602":0,"5615":1,"5627":0,"5664":1,"5670":0,"5688":1,"5695":0,"5716":1,"5723":0,"5749":1,"5758":0,"5790":1,"5797":0,"5819":1,"5825":0,"5839":1,"5845":0,"5872":1,"5880":0,"5906":1,"5913":0,"5928":1,"5935":0,"5954":1,"5955":0,"5980":1,"5987":0,"6005":1,"6011":0,"6024":1,"6035":0,"6046":1,"6054":0,"6064":1,"6071":0,"6098":1,"6104":0,"6177":1,"6185":0,"6215":1,"6223":0,"6230":1,"6239":0,"6266":1,"6272":0,"6288":1,"6349":0,"6356":1,"6365":0,"6386":1,"6394":0,"6408":1,"6418":0,"6431":1,"6457":0,"6483":1,"6514":0,"6528":1,"6536":0,"6581":1,"6618":0,"6633":1,"6641":0,"6653":1,"6662":0,"6677":1,"6685":0,"6702":1,"6711":0,"6750":1,"6757":0,"6774":1,"6781":0,"6819":1,"6825":0,"6831":1,"6837":0,"6844":1,"6870":0,"6890":1,"6918":0,"6958":1,"6966":0,"6986":1,"7016":0,"7035":1,"7047":0,"7081":1,"7124":0,"7157":1,"7165":0,"7185":1,"7242":0,"7277":1,"7286":0,"7308":1,"7355":0,"7403":1,"7410":0,"7476":1,"7521":0,"7546":1,"7560":0,"7568":1,"7576":0,"7589":1,"7597":0,"7611":1,"7617":0,"7632":1,"7640":0,"7656":1,"7663":0,"7732":1,"7736":0,"7773":1,"7780":0,"7803":1,"7808":0,"7827":1,"7832":0,"7864":1,"7872":0,"7898":1,"7904":0,"7924":1,"7929":0,"7949":1,"7954":0,"7992":1,"8061":0,"8091":1,"8098":0,"8113":1,"8119":0,"8150":1,"8156":0,"8210":1,"8216":0,"8227":1,"8233":0,"8252":1,"8260":0,"8307":1,"8314":0,"8333":1,"8341":0,"8375":1,"8384":0,"8400":1,"8407":0,"8418":1,"8424":0,"8431":1,"8435":0,"8474":1,"8479":0,"8501":1,"8508":0,"8523":1,"8530":0,"8551":1,"8557":0,"8593":1,"8599":0,"8643":1,"8652":0,"8669":1,"8678":0,"8714":1,"8747":0,"8765":1,"8792":0,"8825":1,"8832":0,"8842":1,"8850":0,"8875":1,"8884":0,"8903":1,"8910":0,"8934":1,"8942":0,"8960":1,"8965":0,"8984":1,"9008":0,"9020":1,"9031":0,"9034":1,"9040":0,"9044":1,"9049":0,"9054":1,"9061":0,"9064":1,"9069":0,"9073":1,"9079":0,"9083":1,"9088":0,"9093":1,"9094":0,"9095":1,"9098":0,"9103":1,"9108":0,"9112":1,"9116":0,"9121":1,"9124":0,"9128":1,"9133":0}'
+          ),
+          Xm = JSON.parse(
+            '{"80":1,"85":0,"165":1,"191":0,"285":1,"291":0,"365":1,"421":0,"476":1,"511":0,"570":1,"598":0,"647":1,"681":0,"721":1,"736":0,"748":1,"770":0,"777":1,"788":0,"883":1,"891":0,"932":1,"939":0,"980":1,"992":0,"1021":1,"1078":0,"1107":1,"1115":0,"1147":1,"1156":0,"1358":1,"1368":0,"1413":1,"1419":0,"1451":1,"1464":0,"1646":1,"1656":0,"1730":1,"1740":0,"1774":1,"1781":0,"1811":1,"1819":0,"1880":1,"1889":0,"1952":1,"1961":0,"2007":1,"2016":0,"2162":1,"2170":0,"2220":1,"2229":0,"2265":1,"2271":0,"2293":1,"2300":0,"2343":1,"2373":0,"2394":1,"2401":0,"2452":1,"2459":0,"2478":1,"2484":0,"2503":1,"2510":0,"2549":1,"2556":0,"2597":1,"2603":0,"2663":1,"2672":0,"2702":1,"2711":0,"2796":1,"2804":0,"2884":1,"2889":0,"3113":1,"3119":0,"3165":1,"3171":0,"3268":1,"3273":0,"3303":1,"3309":0,"3341":1,"3345":0,"3372":1,"3377":0,"3424":1,"3427":0,"3588":1,"3595":0,"3688":1,"3696":0,"4000":1,"4007":0,"4035":1,"4039":0,"4065":1,"4070":0,"4092":1,"4097":0,"4117":1,"4123":0,"4143":1,"4147":0,"4194":1,"4199":0,"4218":1,"4224":0,"4247":1,"4255":0,"4338":1,"4342":0,"4528":1,"4534":0,"4574":1,"4583":0,"4604":1,"4610":0,"4648":1,"4658":0,"4712":1,"4718":0,"4736":1,"4742":0,"4766":1,"4773":0,"4838":1,"4844":0,"4863":1,"4923":0,"4990":1,"4997":0,"5099":1,"5108":0,"5137":1,"5145":0,"5167":1,"5199":0,"5224":1,"5277":0,"5324":1,"5329":0,"5346":1,"5352":0,"5412":1,"5420":0,"5452":1,"5457":0,"5478":1,"5483":0,"5507":1,"5514":0,"5559":1,"5564":0,"5583":1,"5588":0,"5635":1,"5641":0,"5712":1,"5716":0,"5760":1,"5768":0,"5808":1,"5814":0,"5836":1,"5841":0,"5891":1,"5896":0,"5921":1,"5925":0,"5945":1,"5952":0,"5971":1,"5979":0,"6020":1,"6026":0,"6049":1,"6058":0,"6078":1,"6086":0,"6123":1,"6138":0,"6356":1,"6364":0,"6455":1,"6462":0,"6558":1,"6565":0,"6777":1,"6785":0,"6879":1,"6887":0,"6982":1,"6991":0,"7185":1,"7218":0,"7417":1,"7423":0,"7517":1,"7523":0,"7557":1,"7563":0,"7610":1,"7620":0,"7698":1,"7779":0,"7798":1,"7807":0,"7852":1,"7861":0,"7879":1,"7887":0,"7899":1,"7907":0,"7965":1,"7976":0,"8025":1,"8037":0,"8076":1,"8093":0,"8265":1,"8270":0,"8318":1,"8322":0,"8369":1,"8374":0,"8423":1,"8429":0,"8470":1,"8477":0,"8537":1,"8542":0,"8673":1,"8681":0,"8699":1,"8705":0,"8724":1,"8730":0,"8787":1,"8792":0,"8822":1,"8826":0,"8846":1,"8851":0,"8868":1,"8873":0,"8913":1,"8920":0,"8964":1,"8969":0,"8999":1,"9028":0,"9057":1,"9068":0,"9127":1,"9136":0,"9151":1,"9160":0,"9206":1,"9214":0,"9267":1,"9275":0,"9331":1,"9366":0,"9465":1,"9472":0,"9543":1,"9548":0,"9648":1,"9656":0,"9709":1,"9719":0,"9748":1,"9757":0,"9774":1,"9784":0,"9804":1,"9813":0,"9848":1,"9856":0,"9934":1,"9944":0,"9960":1,"9968":0,"9981":1,"9992":0,"10021":1,"10031":0,"10060":1,"10068":0,"10087":1,"10097":0,"10173":1,"10187":0,"10233":1,"10238":0,"10518":1,"10556":0}'
+          ),
+          zm = JSON.parse(
+            '{"48":1,"52":0,"74":1,"78":0,"114":1,"120":0,"143":1,"147":0,"194":1,"219":0,"245":1,"251":0,"267":1,"270":0,"275":1,"281":0,"324":1,"328":0,"341":1,"346":0,"369":1,"376":0,"388":1,"394":0,"419":1,"424":0,"443":1,"448":0,"469":1,"474":0,"495":1,"499":0,"515":1,"520":0,"533":1,"537":0,"553":1,"558":0,"569":1,"575":0,"599":1,"604":0,"660":1,"668":0,"698":1,"704":0,"745":1,"751":0,"762":1,"767":0,"819":1,"824":0,"854":1,"859":0,"886":1,"891":0,"933":1,"939":0,"971":1,"975":0,"981":1,"986":0,"996":1,"1001":0,"1012":1,"1017":0,"1022":1,"1027":0,"1040":1,"1045":0,"1054":1,"1060":0,"1075":1,"1080":0,"1095":1,"1100":0,"1112":1,"1117":0,"1142":1,"1149":0,"1170":1,"1175":0,"1203":1,"1208":0,"1233":1,"1240":0,"1311":1,"1316":0,"1331":1,"1336":0,"1347":1,"1352":0,"1368":1,"1372":0,"1384":1,"1389":0,"1406":1,"1410":0,"1423":1,"1427":0,"1443":1,"1448":0,"1458":1,"1463":0,"1473":1,"1478":0,"1495":1,"1500":0,"1515":1,"1520":0,"1537":1,"1543":0,"1557":1,"1565":0,"1583":1,"1591":0,"1609":1,"1614":0,"1648":1,"1672":0,"1688":1,"1694":0,"1711":1,"1716":0,"1735":1,"1740":0,"1780":1,"1783":0,"1822":1,"1825":0,"1926":1,"1932":0,"1940":1,"1945":0,"1967":1,"1971":0,"1978":1,"1984":0,"1998":1,"2003":0,"2023":1,"2029":0,"2043":1,"2050":0,"2062":1,"2068":0,"2105":1,"2110":0,"2144":1,"2150":0,"2201":1,"2207":0,"2214":1,"2219":0,"2241":1,"2246":0,"2268":1,"2275":0,"2296":1,"2320":0,"2339":1,"2381":0,"2404":1,"2410":0,"2430":1,"2439":0,"2455":1,"2460":0,"2468":1,"2474":0,"2539":1,"2544":0,"2573":1,"2578":0,"2600":1,"2665":0,"2734":1,"2740":0,"2754":1,"2759":0,"2771":1,"2778":0,"2804":1,"2812":0,"2864":1,"2870":0,"2891":1,"2897":0,"2944":1,"2950":0,"2992":1,"2996":0,"3005":1,"3011":0,"3030":1,"3035":0,"3045":1,"3051":0,"3068":1,"3073":0,"3083":1,"3090":0,"3110":1,"3115":0,"3122":1,"3127":0,"3148":1,"3153":0,"3163":1,"3169":0,"3264":1,"3270":0,"3304":1,"3310":0,"3342":1,"3349":0,"3387":1,"3394":0,"3428":1,"3434":0,"3443":1,"3447":0,"3465":1,"3470":0,"3497":1,"3503":0,"3540":1,"3545":0,"3568":1,"3572":0,"3585":1,"3591":0,"3603":1,"3609":0,"3637":1,"3643":0,"3702":1,"3707":0,"3711":1,"3717":0,"3815":1,"3821":0,"3878":1,"3883":0,"3905":1,"3910":0,"3917":1,"3922":0,"3931":1,"3937":0,"3972":1,"3979":0,"4019":1,"4027":0,"4040":1,"4048":0,"4059":1,"4067":0,"4085":1,"4091":0,"4103":1,"4111":0,"4120":1,"4128":0,"4152":1,"4158":0,"4178":1,"4183":0,"4191":1,"4200":0,"4212":1,"4219":0,"4223":1,"4235":0,"4244":1,"4254":0,"4261":1,"4270":0,"4292":1,"4300":0,"4344":1,"4352":0,"4376":1,"4383":0,"4398":1,"4404":0,"4415":1,"4422":0,"4432":1,"4440":0,"4526":1,"4532":0,"4537":1,"4543":0,"4563":1,"4568":0,"4574":1,"4581":0,"4612":1,"4617":0,"4629":1,"4636":0,"4673":1,"4678":0,"4686":1,"4691":0,"4708":1,"4714":0,"4729":1,"4735":0,"4753":1,"4757":0,"4766":1,"4823":0,"4849":1,"4856":0,"4878":1,"4903":0,"4917":1,"4922":0,"4929":1,"4936":0,"4957":1,"4964":0,"4978":1,"4986":0,"4996":1,"5005":0,"5044":1,"5052":0,"5074":1,"5079":0,"5174":1,"5180":0,"5222":1,"5230":0,"5305":1,"5313":0,"5384":1,"5391":0,"5460":1,"5467":0,"5482":1,"5489":0,"5506":1,"5513":0,"5530":1,"5538":0,"5583":1,"5590":0,"5627":1,"5635":0,"5653":1,"5694":0,"5781":1,"5786":0,"5795":1,"5801":0,"5828":1,"5834":0,"5867":1,"5869":0,"5872":1,"5875":0,"5904":1,"5908":0,"5941":1,"5949":0,"6019":1,"6025":0,"6099":1,"6105":0,"6178":1,"6184":0,"6209":1,"6215":0,"6283":1,"6288":0,"6395":1,"6399":0,"6416":1,"6420":0,"6443":1,"6447":0,"6470":1,"6475":0,"6491":1,"6495":0,"6510":1,"6514":0,"6542":1,"6547":0,"6551":1,"6558":0,"6588":1,"6592":0,"6608":1,"6613":0,"6631":1,"6635":0,"6667":1,"6673":0,"6689":1,"6694":0,"6706":1,"6713":0,"6727":1,"6732":0,"6752":1,"6759":0,"6773":1,"6778":0,"6787":1,"6794":0,"6808":1,"6814":0,"6826":1,"6832":0,"6847":1,"6853":0,"6884":1,"6889":0,"6905":1,"6910":0,"6916":1,"6922":0,"6929":1,"6936":0,"6946":1,"6954":0,"6966":1,"6972":0,"6984":1,"6990":0,"7024":1,"7027":0,"7041":1,"7046":0,"7060":1,"7066":0,"7090":1,"7098":0,"7110":1,"7118":0,"7128":1,"7136":0,"7159":1,"7164":0,"7198":1,"7202":0,"7219":1,"7224":0,"7239":1,"7243":0,"7259":1,"7264":0,"7276":1,"7282":0,"7309":1,"7319":0,"7338":1,"7342":0,"7360":1,"7366":0,"7380":1,"7385":0,"7401":1,"7406":0,"7417":1,"7423":0,"7439":1,"7444":0,"7456":1,"7462":0,"7526":1,"7532":0,"7546":1,"7552":0,"7606":1,"7612":0,"7641":1,"7646":0,"7710":1,"7714":0,"7729":1,"7734":0,"7763":1,"7769":0,"7805":1,"7853":0,"7905":1,"7911":0,"7925":1,"7930":0,"7943":1,"7949":0,"7969":1,"7973":0,"7988":1,"7993":0,"8017":1,"8023":0,"8057":1,"8064":0,"8096":1,"8104":0,"8126":1,"8130":0,"8219":1,"8226":0,"8299":1,"8304":0,"8333":1,"8339":0,"8361":1,"8366":0,"8379":1,"8384":0,"8417":1,"8422":0,"8456":1,"8461":0,"8477":1,"8482":0,"8503":1,"8512":0,"8524":1,"8531":0,"8546":1,"8550":0,"8558":1,"8564":0,"8574":1,"8578":0,"8586":1,"8592":0,"8650":1,"8657":0,"8669":1,"8677":0,"8692":1,"8697":0,"8732":1,"8737":0,"8746":1,"8751":0,"8774":1,"8778":0,"8822":1,"8829":0,"8916":1,"8921":0,"8972":1,"8978":0,"8983":1,"9003":0,"9031":1,"9038":0,"9070":1,"9074":0,"9146":1,"9151":0,"9188":1,"9195":0,"9220":1,"9226":0,"9237":1,"9243":0,"9260":1,"9266":0,"9284":1,"9289":0,"9308":1,"9315":0,"9336":1,"9343":0,"9382":1,"9389":0,"9411":1,"9419":0,"9444":1,"9452":0,"9482":1,"9489":0,"9524":1,"9531":0}'
+          ),
+          Wm = JSON.parse(
+            '{"130":1,"138":0,"243":1,"250":0,"358":1,"365":0,"594":1,"602":0,"709":1,"715":0,"797":1,"803":0,"821":1,"832":0,"903":1,"911":0,"1005":1,"1012":0,"1205":1,"1211":0,"1436":1,"1445":0,"1536":1,"1543":0,"1630":1,"1641":0,"1732":1,"1739":0,"1762":1,"1771":0,"1830":1,"1839":0,"1860":1,"1869":0,"1928":1,"1938":0,"1958":1,"1967":0,"2103":1,"2110":0,"2330":1,"2418":0,"2454":1,"2476":0,"2485":1,"2524":0,"2566":1,"2683":0,"2719":1,"2780":0,"2807":1,"2867":0,"2911":1,"2920":0,"2956":1,"2992":0,"3158":1,"3166":0,"3268":1,"3278":0,"3381":1,"3390":0,"3445":1,"3454":0,"3651":1,"3657":0,"3731":1,"3738":0,"3817":1,"3827":0,"3845":1,"3853":0,"3927":1,"3935":0,"3955":1,"3963":0,"4034":1,"4043":0,"4121":1,"4129":0,"4148":1,"4156":0,"4232":1,"4242":0,"4312":1,"4321":0,"4572":1,"4579":0,"4674":1,"4695":0,"4767":1,"4804":0,"4873":1,"4913":0,"4963":1,"5026":0,"5142":1,"5151":0}',
+          ),
+          qm = JSON.parse(
+            '{"81":1,"87":0,"159":1,"163":0,"205":1,"210":0,"234":1,"240":0,"290":1,"296":0,"330":1,"336":0,"352":1,"357":0,"438":1,"443":0,"465":1,"470":0,"495":1,"500":0,"539":1,"545":0,"559":1,"566":0,"594":1,"602":0,"621":1,"625":0,"661":1,"665":0,"739":1,"745":0,"786":1,"793":0,"821":1,"826":0,"874":1,"880":0,"903":1,"908":0,"929":1,"934":0,"954":1,"959":0,"980":1,"984":0,"1026":1,"1031":0,"1113":1,"1119":0,"1136":1,"1141":0,"1185":1,"1190":0,"1284":1,"1290":0,"1344":1,"1351":0,"1374":1,"1381":0,"1409":1,"1420":0,"1466":1,"1472":0,"1492":1,"1499":0,"1511":1,"1517":0,"1568":1,"1574":0,"1653":1,"1660":0,"1700":1,"1706":0,"1721":1,"1728":0,"1747":1,"1754":0,"1777":1,"1784":0,"1799":1,"1805":0,"1829":1,"1838":0,"1855":1,"1889":0,"1904":1,"1915":0,"1957":1,"2008":0,"2084":1,"2091":0,"2109":1,"2117":0,"2183":1,"2219":0,"2243":1,"2291":0,"2316":1,"2373":0,"2394":1,"2454":0,"2472":1,"2480":0,"2504":1,"2515":0,"2545":1,"2579":0,"2600":1,"2630":0,"2679":1,"2684":0,"2704":1,"2710":0,"2728":1,"2738":0,"2752":1,"2761":0,"2804":1,"2811":0,"2827":1,"2836":0,"2982":1,"2987":0,"3021":1,"3027":0,"3085":1,"3092":0,"3112":1,"3119":0,"3162":1,"3195":0,"3213":1,"3221":0,"3238":1,"3246":0,"3347":1,"3355":0,"3420":1,"3426":0,"3446":1,"3453":0,"3475":1,"3481":0,"3521":1,"3526":0,"3546":1,"3552":0,"3571":1,"3576":0,"3627":1,"3680":0,"3756":1,"3763":0,"3783":1,"3790":0,"3834":1,"3841":0,"3862":1,"3867":0,"3886":1,"3919":0,"4047":1,"4055":0,"4087":1,"4093":0,"4117":1,"4122":0,"4193":1,"4220":0,"4244":1,"4250":0,"4295":1,"4298":0,"4333":1,"4341":0,"4359":1,"4366":0,"4388":1,"4394":0,"4422":1,"4427":0,"4447":1,"4451":0,"4484":1,"4488":0,"4555":1,"4560":0,"4602":1,"4636":0,"4684":1,"4719":0,"4758":1,"4767":0,"4811":1,"4881":0,"4918":1,"4930":0,"4963":1,"4970":0,"5007":1,"5080":0,"5122":1,"5130":0,"5170":1,"5174":0,"5194":1,"5202":0,"5217":1,"5223":0,"5252":1,"5305":0,"5373":1,"5380":0,"5429":1,"5435":0,"5453":1,"5460":0,"5480":1,"5488":0,"5580":1,"5585":0,"5631":1,"5638":0,"5659":1,"5666":0,"5678":1,"5687":0,"5707":1,"5714":0,"5736":1,"5742":0,"5815":1,"5822":0,"5841":1,"5849":0,"5888":1,"5894":0,"5915":1,"5920":0,"5942":1,"5947":0,"5995":1,"6000":0,"6017":1,"6024":0,"6068":1,"6075":0,"6096":1,"6103":0,"6119":1,"6125":0,"6138":1,"6145":0,"6226":1,"6234":0,"6252":1,"6263":0,"6275":1,"6285":0,"6304":1,"6315":0,"6330":1,"6341":0,"6356":1,"6368":0,"6396":1,"6406":0,"6432":1,"6446":0,"6458":1,"6470":0,"6484":1,"6497":0,"6507":1,"6518":0,"6569":1,"6577":0,"6605":1,"6612":0,"6633":1,"6641":0,"6661":1,"6669":0,"6712":1,"6721":0,"6732":1,"6742":0,"6765":1,"6776":0,"6844":1,"6851":0,"6871":1,"6879":0,"6898":1,"6905":0,"6925":1,"6932":0,"6950":1,"6955":0,"6976":1,"6985":0}',
+          ),
+          $m = JSON.parse(
+            '{"329":1,"336":0,"457":1,"464":0,"490":1,"496":0,"524":1,"531":0,"682":1,"689":0,"764":1,"770":0,"801":1,"807":0,"830":1,"836":0,"1004":1,"1020":0,"1033":1,"1040":0,"1062":1,"1070":0,"1094":1,"1099":0,"1122":1,"1129":0,"1172":1,"1179":0,"1206":1,"1213":0,"1271":1,"1278":0,"1379":1,"1387":0,"1410":1,"1417":0,"1453":1,"1458":0,"1526":1,"1532":0,"1549":1,"1554":0,"1618":1,"1688":0,"1734":1,"1743":0,"1762":1,"1770":0,"1800":1,"1805":0,"1887":1,"1894":0,"1918":1,"1924":0,"1958":1,"1964":0,"2002":1,"2009":0,"2073":1,"2081":0,"2196":1,"2207":0,"2288":1,"2295":0,"2420":1,"2428":0,"2582":1,"2590":0,"2645":1,"2652":0,"2674":1,"2679":0,"2706":1,"2711":0,"2728":1,"2733":0,"2812":1,"2820":0,"2841":1,"2848":0,"2904":1,"2911":0,"3019":1,"3094":0,"3121":1,"3128":0,"3183":1,"3184":0,"3224":1,"3230":0,"3306":1,"3349":0,"3398":1,"3404":0,"3464":1,"3558":0,"3699":1,"3705":0,"3826":1,"3832":0,"3871":1,"3875":0,"3904":1,"3909":0,"3934":1,"3939":0,"4000":1,"4006":0,"4042":1,"4048":0,"4073":1,"4078":0,"4164":1,"4171":0,"4216":1,"4221":0,"4264":1,"4270":0,"4347":1,"4353":0,"4369":1,"4376":0,"4394":1,"4401":0,"4430":1,"4436":0,"4717":1,"4723":0,"4867":1,"4873":0,"4966":1,"4970":0,"5006":1,"5014":0,"5044":1,"5049":0,"5104":1,"5113":0,"5125":1,"5130":0,"5184":1,"5189":0,"5235":1,"5241":0,"5264":1,"5270":0,"5292":1,"5293":0,"5328":1,"5333":0,"5378":1,"5384":0,"5415":1,"5425":0,"5455":1,"5461":0,"5605":1,"5614":0,"5645":1,"5663":0,"5672":1,"5682":0,"5688":1,"5698":0,"5735":1,"5742":0,"5822":1,"5850":0,"5875":1,"5885":0,"5971":1,"5975":0,"5998":1,"6006":0,"6030":1,"6041":0,"6051":1,"6059":0,"6070":1,"6079":0,"6091":1,"6099":0,"6143":1,"6150":0,"6211":1,"6219":0,"6238":1,"6245":0,"6298":1,"6305":0,"6328":1,"6334":0,"6365":1,"6371":0,"6396":1,"6401":0,"6424":1,"6428":0,"6577":1,"6583":0,"6636":1,"6644":0,"6684":1,"6691":0,"6746":1,"6752":0,"6825":1,"6831":0,"6885":1,"6890":0,"6911":1,"6918":0,"6955":1,"6961":0,"7000":1,"7007":0,"7120":1,"7125":0,"7148":1,"7154":0,"7178":1,"7184":0,"7202":1,"7209":0,"7226":1,"7236":0,"7255":1,"7261":0,"7332":1,"7337":0,"7456":1,"7460":0,"7483":1,"7488":0,"7543":1,"7551":0,"7577":1,"7583":0,"7637":1,"7643":0,"7680":1,"7687":0,"7713":1,"7845":0,"7904":1,"8011":0,"8031":1,"8038":0,"8080":1,"8089":0,"8120":1,"8125":0,"8150":1,"8156":0,"8211":1,"8218":0,"8249":1,"8254":0,"8325":1,"8329":0,"8382":1,"8389":0,"8416":1,"8424":0,"8448":1,"8457":0,"8484":1,"8545":0,"8580":1,"8620":0,"8664":1,"8789":0,"8812":1,"8820":0,"8846":1,"8890":0,"8918":1,"8929":0,"8956":1,"8964":0,"9010":1,"9017":0,"9047":1,"9053":0,"9094":1,"9099":0,"9135":1,"9140":0,"9178":1,"9184":0,"9203":1,"9211":0}'
+          ),
+          Jm = JSON.parse(
+            '{"70":1,"77":0,"90":1,"99":0,"130":1,"149":0,"151":1,"166":0,"176":1,"188":0,"206":1,"215":0,"231":1,"238":0,"259":1,"267":0,"309":1,"316":0,"352":1,"379":0,"401":1,"411":0,"440":1,"446":0,"484":1,"491":0,"517":1,"522":0,"563":1,"587":0,"607":1,"638":0,"664":1,"669":0,"708":1,"717":0,"736":1,"743":0,"761":1,"767":0,"788":1,"794":0,"814":1,"820":0,"839":1,"846":0,"934":1,"987":0,"1031":1,"1084":0,"1094":1,"1100":0,"1125":1,"1187":0,"1238":1,"1291":0,"1354":1,"1382":0,"1403":1,"1423":0,"1457":1,"1466":0,"1507":1,"1543":0,"1563":1,"1569":0,"1618":1,"1632":0,"1649":1,"1657":0,"1676":1,"1682":0,"1694":1,"1702":0,"1713":1,"1724":0,"1753":1,"1758":0,"1803":1,"1810":0,"1837":1,"1858":0,"1887":1,"1899":0,"1913":1,"1922":0,"1945":1,"1952":0,"1983":1,"1988":0,"2004":1,"2011":0,"2058":1,"2065":0,"2082":1,"2090":0,"2112":1,"2118":0,"2166":1,"2172":0,"2244":1,"2252":0,"2271":1,"2279":0,"2303":1,"2309":0,"2330":1,"2336":0,"2360":1,"2366":0,"2407":1,"2413":0,"2438":1,"2445":0,"2461":1,"2469":0,"2492":1,"2498":0,"2521":1,"2527":0,"2547":1,"2553":0,"2574":1,"2581":0,"2603":1,"2609":0,"2627":1,"2634":0,"2656":1,"2663":0,"2705":1,"2712":0,"2742":1,"2748":0,"2761":1,"2769":0,"2794":1,"2801":0,"2845":1,"2851":0,"2868":1,"2907":0,"2939":1,"2946":0,"2955":1,"2962":0,"2989":1,"2996":0,"3052":1,"3061":0,"3139":1,"3145":0,"3188":1,"3194":0,"3224":1,"3227":0,"3244":1,"3250":0,"3283":1,"3293":0,"3314":1,"3321":0,"3354":1,"3361":0,"3393":1,"3399":0,"3460":1,"3466":0,"3480":1,"3486":0,"3514":1,"3521":0,"3572":1,"3580":0,"3638":1,"3646":0,"3679":1,"3687":0,"3702":1,"3712":0,"3750":1,"3759":0,"3786":1,"3795":0,"3855":1,"3861":0,"3882":1,"3887":0,"3907":1,"3913":0,"3929":1,"3936":0,"3949":1,"3955":0,"4071":1,"4075":0,"4095":1,"4099":0,"4153":1,"4160":0,"4171":1,"4178":0,"4209":1,"4217":0,"4234":1,"4243":0,"4263":1,"4271":0,"4320":1,"4326":0,"4346":1,"4353":0,"4373":1,"4379":0,"4410":1,"4416":0,"4448":1,"4456":0,"4493":1,"4500":0,"4530":1,"4535":0,"4557":1,"4563":0,"4599":1,"4608":0,"4635":1,"4641":0,"4659":1,"4666":0,"4685":1,"4694":0,"4724":1,"4733":0,"4748":1,"4755":0,"4772":1,"4781":0,"4819":1,"4830":0,"4853":1,"4862":0,"4880":1,"4888":0,"4946":1,"4955":0,"4968":1,"4979":0,"4998":1,"5009":0,"5042":1,"5050":0,"5079":1,"5112":0,"5159":1,"5165":0,"5187":1,"5246":0,"5270":1,"5331":0,"5361":1,"5370":0,"5402":1,"5412":0,"5442":1,"5452":0,"5481":1,"5490":0,"5503":1,"5511":0,"5534":1,"5543":0,"5598":1,"5602":0,"5623":1,"5627":0,"5659":1,"5670":0,"5713":1,"5721":0,"5787":1,"5795":0,"5808":1,"5820":0,"5858":1,"5867":0,"5878":1,"5886":0,"5897":1,"5912":0,"5921":1,"5935":0,"6016":1,"6024":0,"6044":1,"6051":0,"6062":1,"6069":0,"6121":1,"6128":0,"6144":1,"6154":0,"6186":1,"6194":0,"6252":1,"6257":0,"6282":1,"6288":0,"6311":1,"6316":0,"6338":1,"6347":0,"6363":1,"6373":0,"6389":1,"6398":0,"6443":1,"6451":0,"6474":1,"6482":0,"6500":1,"6506":0,"6525":1,"6532":0,"6552":1,"6560":0,"6575":1,"6586":0,"6599":1,"6609":0,"6619":1,"6629":0,"6690":1,"6700":0,"6710":1,"6717":0,"6742":1,"6752":0,"6757":1,"6774":0,"6797":1,"6804":0,"6825":1,"6832":0,"6851":1,"6858":0,"6878":1,"6887":0,"6930":1,"6935":0,"6961":1,"6969":0,"6990":1,"6997":0,"7016":1,"7022":0,"7043":1,"7051":0,"7068":1,"7075":0,"7126":1,"7131":0,"7161":1,"7167":0,"7187":1,"7193":0,"7213":1,"7220":0,"7235":1,"7241":0,"7272":1,"7280":0,"7316":1,"7325":0,"7341":1,"7348":0,"7369":1,"7376":0,"7405":1,"7413":0,"7561":1,"7569":0,"7587":1,"7591":0,"7638":1,"7643":0,"7669":1,"7674":0,"7703":1,"7710":0,"7736":1,"7742":0,"7776":1,"7783":0,"7811":1,"7819":0,"7888":1,"7894":0,"7923":1,"7931":0,"7997":1,"8003":0,"8029":1,"8035":0,"8057":1,"8062":0,"8084":1,"8092":0,"8127":1,"8133":0,"8151":1,"8159":0,"8169":1,"8177":0,"8205":1,"8227":0,"8268":1,"8275":0,"8313":1,"8320":0,"8351":1,"8377":0,"8434":1,"8463":0,"8490":1,"8502":0,"8518":1,"8526":0,"8546":1,"8582":0,"8601":1,"8660":0,"8692":1,"8722":0,"8817":1,"8826":0}'
+          ),
+          Km = JSON.parse(
+            '{"107":1,"114":0,"179":1,"187":0,"260":1,"267":0,"347":1,"354":0,"405":1,"412":0,"471":1,"671":0,"750":1,"757":0,"779":1,"787":0,"804":1,"813":0,"874":1,"882":0,"929":1,"936":0,"984":1,"990":0,"1040":1,"1047":0,"1206":1,"1213":0,"1259":1,"1267":0,"1316":1,"1323":0,"1356":1,"1696":0,"1716":1,"1726":0,"1763":1,"1771":0,"1833":1,"1841":0,"1887":1,"1898":0,"1970":1,"2074":0,"2148":1,"2155":0,"2206":1,"2214":0,"2290":1,"2298":0,"2344":1,"2352":0,"2501":1,"2507":0,"2621":1,"2629":0,"2727":1,"2736":0,"2789":1,"2797":0,"2863":1,"2871":0,"2919":1,"2943":0,"3071":1,"3079":0,"3161":1,"3168":0,"3250":1,"3332":0,"3389":1,"3398":0,"3426":1,"3436":0,"3455":1,"3463":0,"3522":1,"3528":0,"3616":1,"3623":0,"3741":1,"3748":0,"3840":1,"3848":0,"3890":1,"3899":0,"3983":1,"4040":0,"4116":1,"4124":0,"4174":1,"4181":0,"4211":1,"4292":0,"4332":1,"4341":0,"4373":1,"4381":0,"4421":1,"4480":0,"4526":1,"4533":0,"4580":1,"4588":0,"4600":1,"4616":0,"4649":1,"4684":0,"4718":1,"4728":0,"4750":1,"4758":0,"4788":1,"4839":0,"4935":1,"4944":0,"4984":1,"4993":0,"5021":1,"5032":0,"5068":1,"5076":0,"5101":1,"5110":0,"5144":1,"5153":0,"5200":1,"5209":0,"5258":1,"5295":0,"5324":1,"5332":0,"5355":1,"5363":0,"5421":1,"5430":0,"5521":1,"5528":0,"5557":1,"5643":0,"5683":1,"5715":0,"5829":1,"5837":0,"5887":1,"5894":0,"5933":1,"5941":0,"6014":1,"6022":0,"6183":1,"6192":0,"6278":1,"6285":0,"6331":1,"6340":0,"6374":1,"6381":0,"6437":1,"6444":0,"6488":1,"6496":0,"6542":1,"6548":0,"6589":1,"6599":0,"6639":1,"6648":0,"6704":1,"6714":0,"6767":1,"6774":0,"6803":1,"6811":0,"6865":1,"6875":0,"6938":1,"6944":0,"7016":1,"7024":0,"7046":1,"7055":0,"7085":1,"7092":0,"7149":1,"7158":0,"7206":1,"7214":0,"7334":1,"7341":0,"7464":1,"7471":0}',
+          ),
+          Qm = JSON.parse(
+            '{"177":1,"182":0,"239":1,"246":0,"313":1,"319":0,"405":1,"411":0,"453":1,"461":0,"484":1,"491":0,"525":1,"533":0,"628":1,"636":0,"647":1,"654":0,"667":1,"674":0,"701":1,"708":0,"730":1,"738":0,"759":1,"767":0,"792":1,"799":0,"851":1,"861":0,"889":1,"898":0,"922":1,"929":0,"946":1,"954":0,"993":1,"1001":0,"1098":1,"1104":0,"1161":1,"1168":0,"1201":1,"1208":0,"1221":1,"1229":0,"1397":1,"1403":0,"1468":1,"1477":0,"1551":1,"1559":0,"1603":1,"1611":0,"1641":1,"1650":0,"1697":1,"1704":0,"1735":1,"1742":0,"1803":1,"1811":0,"1882":1,"1890":0,"2027":1,"2035":0,"2066":1,"2074":0,"2123":1,"2130":0,"2186":1,"2193":0,"2230":1,"2238":0,"2252":1,"2260":0,"2309":1,"2317":0,"2348":1,"2356":0,"2413":1,"2419":0,"2435":1,"2443":0,"2475":1,"2483":0,"2492":1,"2499":0,"2679":1,"2687":0,"2725":1,"2734":0,"2766":1,"2774":0,"2800":1,"2808":0,"2828":1,"2836":0,"2888":1,"2896":0,"2921":1,"2929":0,"2951":1,"2959":0,"3023":1,"3031":0,"3072":1,"3080":0,"3178":1,"3187":0,"3278":1,"3286":0,"3328":1,"3335":0,"3364":1,"3372":0,"3448":1,"3455":0,"3502":1,"3510":0,"3526":1,"3534":0,"3551":1,"3558":0,"3581":1,"3588":0,"3610":1,"3618":0,"3695":1,"3703":0,"3773":1,"3782":0,"3809":1,"3816":0,"3831":1,"3839":0,"3849":1,"3857":0,"4085":1,"4094":0,"4180":1,"4188":0,"4247":1,"4254":0,"4339":1,"4348":0,"4408":1,"4416":0,"4498":1,"4508":0,"4589":1,"4598":0,"4633":1,"4641":0,"4671":1,"4679":0,"4719":1,"4728":0,"4759":1,"4768":0,"4807":1,"4815":0,"4827":1,"4835":0,"4851":1,"4858":0,"4872":1,"4880":0,"4899":1,"4906":0,"4926":1,"4933":0,"4982":1,"4990":0,"5027":1,"5035":0,"5058":1,"5067":0,"5106":1,"5114":0,"5155":1,"5163":0,"5199":1,"5208":0}',
+          ),
+          Zm = JSON.parse(
+            '{"58":1,"64":0,"165":1,"173":0,"193":1,"204":0,"219":1,"237":0,"273":1,"284":0,"304":1,"334":0,"460":1,"483":0,"564":1,"579":0,"595":1,"612":0,"628":1,"640":0,"699":1,"714":0,"862":1,"868":0,"875":1,"899":0,"924":1,"933":0,"953":1,"961":0,"1026":1,"1073":0,"1119":1,"1165":0,"1275":1,"1286":0,"1304":1,"1319":0,"1329":1,"1341":0,"1380":1,"1389":0,"1411":1,"1419":0,"1514":1,"1529":0,"1542":1,"1552":0,"1567":1,"1576":0,"1591":1,"1602":0,"1663":1,"1676":0,"1698":1,"1712":0,"1729":1,"1742":0,"1756":1,"1764":0,"1805":1,"1813":0,"1860":1,"1883":0,"1903":1,"1914":0,"1928":1,"1942":0,"1956":1,"1963":0,"1989":1,"1998":0,"2049":1,"2098":0,"2142":1,"2155":0,"2225":1,"2237":0,"2250":1,"2258":0,"2271":1,"2279":0,"2294":1,"2306":0,"2322":1,"2329":0,"2361":1,"2368":0,"2410":1,"2448":0,"2479":1,"2505":0,"2589":1,"2596":0,"2618":1,"2632":0,"2646":1,"2653":0,"2670":1,"2686":0,"2719":1,"2726":0,"2770":1,"2782":0,"2802":1,"2817":0,"2834":1,"2848":0,"2862":1,"2876":0,"2973":1,"2980":0,"3002":1,"3031":0,"3114":1,"3125":0,"3144":1,"3156":0,"3169":1,"3183":0,"3228":1,"3265":0,"3299":1,"3309":0,"3349":1,"3392":0,"3427":1,"3458":0,"3484":1,"3512":0,"3527":1,"3538":0,"3568":1,"3578":0,"3597":1,"3638":0,"3733":1,"3742":0,"3763":1,"3784":0,"3810":1,"3830":0,"3854":1,"3880":0,"3903":1,"3922":0,"3946":1,"3973":0,"3997":1,"4015":0,"4039":1,"4052":0,"4093":1,"4113":0,"4137":1,"4147":0,"4164":1,"4203":0,"4228":1,"4237":0,"4272":1,"4379":0,"4386":1,"4399":0,"4468":1,"4475":0,"4496":1,"4513":0,"4530":1,"4546":0,"4570":1,"4595":0,"4616":1,"4630":0,"4638":1,"4643":0,"4660":1,"4672":0,"4688":1,"4706":0,"4729":1,"4754":0,"4770":1,"4782":0,"4799":1,"4828":0,"4847":1,"4863":0,"4872":1,"4877":0,"4906":1,"4923":0,"4947":1,"4978":0,"4992":1,"5010":0,"5036":1,"5069":0,"5082":1,"5100":0,"5118":1,"5129":0,"5146":1,"5160":0,"5211":1,"5221":0,"5232":1,"5246":0,"5260":1,"5271":0,"5287":1,"5300":0,"5309":1,"5318":0,"5375":1,"5410":0,"5447":1,"5459":0,"5473":1,"5482":0,"5493":1,"5503":0,"5522":1,"5533":0,"5542":1,"5547":0,"5587":1,"5601":0,"5609":1,"5626":0,"5652":1,"5664":0,"5676":1,"5687":0,"5700":1,"5714":0,"5728":1,"5739":0,"5793":1,"5805":0,"5840":1,"5849":0,"5953":1,"5977":0,"5989":1,"5998":0,"6046":1,"6073":0,"6088":1,"6098":0,"6126":1,"6155":0,"6233":1,"6240":0,"6267":1,"6309":0,"6376":1,"6382":0,"6412":1,"6456":0,"6538":1,"6553":0,"6562":1,"6572":0,"6585":1,"6590":0,"6616":1,"6636":0,"6727":1,"6749":0,"6809":1,"6833":0,"6887":1,"6893":0,"6910":1,"6921":0,"6949":1,"6998":0,"7089":1,"7101":0,"7119":1,"7139":0,"7179":1,"7199":0,"7257":1,"7276":0,"7291":1,"7310":0,"7352":1,"7368":0,"7383":1,"7415":0}',
+          ),
+          ef = JSON.parse(
+             '{"56":1,"60":0,"142":1,"156":0,"159":1,"180":0,"199":1,"207":0,"272":1,"279":0,"310":1,"316":0,"373":1,"383":0,"386":1,"409":0,"437":1,"473":0,"535":1,"540":0,"619":1,"658":0,"731":1,"765":0,"787":1,"849":0,"874":1,"912":0,"1071":1,"1107":0,"1200":1,"1228":0,"1328":1,"1349":0,"1382":1,"1399":0,"1426":1,"1439":0,"1493":1,"1528":0,"1561":1,"1571":0,"1629":1,"1643":0,"1688":1,"1694":0,"1715":1,"1722":0,"1807":1,"1816":0,"1862":1,"1875":0,"1915":1,"1957":0,"1994":1,"2001":0,"2024":1,"2032":0,"2055":1,"2060":0,"2072":1,"2084":0,"2141":1,"2153":0,"2189":1,"2249":0,"2392":1,"2459":0,"2506":1,"2550":0,"2558":1,"2567":0,"2573":1,"2589":0,"2611":1,"2616":0,"2675":1,"2697":0,"2706":1,"2717":0,"2743":1,"2752":0,"2761":1,"2769":0,"2779":1,"2800":0,"2820":1,"2836":0,"2841":1,"2871":0,"2882":1,"2892":0,"2927":1,"3073":0,"3095":1,"3135":0,"3147":1,"3191":0,"3266":1,"3333":0,"3361":1,"3428":0,"3449":1,"3457":0,"3485":1,"3490":0,"3544":1,"3579":0,"3601":1,"3608":0,"3634":1,"3641":0,"3659":1,"3668":0,"3685":1,"3695":0,"3715":1,"3719":0,"3795":1,"3799":0,"3819":1,"3825":0,"3850":1,"3857":0,"3881":1,"3885":0,"3909":1,"3914":0,"3945":1,"3953":0,"3977":1,"3985":0,"4011":1,"4022":0,"4055":1,"4064":0,"4067":1,"4090":0,"4116":1,"4157":0,"4190":1,"4200":0,"4248":1,"4279":0,"4306":1,"4314":0,"4331":1,"4337":0,"4392":1,"4400":0,"4472":1,"4482":0,"4524":1,"4538":0,"4582":1,"4596":0,"4617":1,"4659":0,"4724":1,"4748":0,"4834":1,"4894":0,"4922":1,"4927":0,"5037":1,"5043":0,"5089":1,"5097":0,"5124":1,"5129":0,"5204":1,"5209":0,"5229":1,"5237":0,"5273":1,"5282":0,"5346":1,"5361":0,"5541":1,"5548":0,"5622":1,"5642":0,"5685":1,"5690":0,"5761":1,"5770":0,"5783":1,"5791":0,"5866":1,"5874":0,"5906":1,"5940":0,"5991":1,"6028":0,"6049":1,"6057":0,"6081":1,"6130":0,"6225":1,"6272":0,"6322":1,"6350":0,"6352":1,"6381":0,"6429":1,"6438":0,"6439":1,"6464":0,"6486":1,"6494":0,"6529":1,"6536":0,"6580":1,"6644":0,"6662":1,"6685":0,"6712":1,"6724":0,"6748":1,"6757":0,"6792":1,"6832":0,"6841":1,"6854":0,"7000":1,"7012":0,"7066":1,"7080":0,"7139":1,"7151":0,"7208":1,"7358":0,"7417":1,"7435":0,"7480":1,"7491":0,"7601":1,"7608":0,"7626":1,"7632":0,"7669":1,"7675":0,"7763":1,"7770":0,"7790":1,"7832":0,"7846":1,"7854":0,"7904":1,"7916":0,"7928":1,"7935":0,"7950":1,"7958":0,"8044":1,"8051":0,"8073":1,"8077":0,"8160":1,"8170":0,"8192":1,"8200":0,"8218":1,"8223":0,"8239":1,"8247":0,"8269":1,"8274":0,"8292":1,"8301":0,"8405":1,"8411":0,"8437":1,"8442":0,"8495":1,"8504":0,"8555":1,"8561":0,"8657":1,"8725":0,"8747":1,"8765":0,"8829":1,"8837":0,"8859":1,"8865":0,"8885":1,"8893":0,"9082":1,"9089":0,"9255":1,"9287":0,"9356":1,"9363":0,"9499":1,"9507":0,"9520":1,"9536":0,"9619":1,"9658":0}'
+          ),
+          tf = JSON.parse(
+            '{"46":1,"49":0,"83":1,"88":0,"113":1,"116":0,"138":1,"143":0,"211":1,"217":0,"272":1,"279":0,"309":1,"366":0,"427":1,"433":0,"465":1,"472":0,"505":1,"512":0,"579":1,"586":0,"654":1,"660":0,"691":1,"695":0,"720":1,"725":0,"765":1,"773":0,"789":1,"795":0,"928":1,"933":0,"973":1,"978":0,"1002":1,"1008":0,"1030":1,"1036":0,"1097":1,"1104":0,"1147":1,"1156":0,"1205":1,"1213":0,"1258":1,"1264":0,"1347":1,"1354":0,"1375":1,"1382":0,"1414":1,"1474":0,"1565":1,"1572":0,"1635":1,"1640":0,"1664":1,"1668":0,"1691":1,"1696":0,"1812":1,"1821":0,"1872":1,"1883":0,"1918":1,"1930":0,"1985":1,"1995":0,"2076":1,"2081":0,"2136":1,"2170":0,"2225":1,"2235":0,"2265":1,"2275":0,"2301":1,"2311":0,"2390":1,"2396":0,"2421":1,"2427":0,"2454":1,"2461":0,"2693":1,"2702":0,"2742":1,"2749":0,"2880":1,"2885":0,"2913":1,"2917":0,"2960":1,"2964":0,"3006":1,"3012":0,"3097":1,"3103":0,"3132":1,"3138":0,"3198":1,"3204":0,"3230":1,"3240":0,"3296":1,"3302":0,"3351":1,"3356":0,"3421":1,"3430":0,"3470":1,"3481":0,"3566":1,"3574":0,"3652":1,"3659":0,"3713":1,"3718":0,"3791":1,"3797":0,"3833":1,"3841":0,"3987":1,"3993":0,"4015":1,"4021":0,"4046":1,"4053":0,"4071":1,"4081":0,"4115":1,"4122":0,"4142":1,"4148":0,"4222":1,"4230":0,"4253":1,"4262":0,"4290":1,"4295":0,"4367":1,"4372":0,"4548":1,"4555":0,"4741":1,"4750":0,"4766":1,"4778":0,"4853":1,"4861":0,"5044":1,"5051":0,"5095":1,"5102":0,"5194":1,"5203":0,"5229":1,"5238":0,"5271":1,"5280":0,"5412":1,"5416":0,"5476":1,"5483":0,"5572":1,"5579":0,"5630":1,"5637":0,"5670":1,"5678":0,"5759":1,"5767":0,"5791":1,"5800":0,"5883":1,"5890":0,"5988":1,"5997":0,"6030":1,"6039":0,"6104":1,"6112":0,"6126":1,"6132":0,"6249":1,"6256":0,"6294":1,"6301":0,"6322":1,"6328":0,"6345":1,"6353":0,"6370":1,"6383":0,"6484":1,"6493":0,"6516":1,"6524":0,"6539":1,"6549":0,"6568":1,"6606":0,"6702":1,"6743":0,"6771":1,"6779":0,"6799":1,"6805":0,"6823":1,"6832":0,"6936":1,"7008":0,"7031":1,"7039":0,"7139":1,"7154":0,"7156":1,"7160":0,"7206":1,"7277":0,"7358":1,"7367":0,"7386":1,"7396":0,"7547":1,"7560":0,"7753":1,"7763":0,"7780":1,"7788":0,"7803":1,"7813":0,"7868":1,"7875":0,"7915":1,"7923":0,"8047":1,"8056":0,"8089":1,"8096":0,"8135":1,"8142":0,"8220":1,"8226":0,"8267":1,"8273":0,"8303":1,"8308":0,"8415":1,"8420":0,"8514":1,"8519":0,"8549":1,"8554":0,"8640":1,"8646":0,"8715":1,"8720":0,"8800":1,"8807":0,"8905":1,"8911":0,"8943":1,"8950":0,"9053":1,"9059":0,"9120":1,"9128":0,"9348":1,"9354":0,"9374":1,"9384":0,"9450":1,"9459":0,"9506":1,"9515":0,"9596":1,"9608":0,"9617":1,"9630":0,"9647":1,"9657":0,"9671":1,"9681":0,"9695":1,"9709":0,"9721":1,"9730":0,"9807":1,"9814":0,"9862":1,"9868":0,"9919":1,"9927":0,"9973":1,"9983":0,"10032":1,"10039":0}'
+          ),
+          af = JSON.parse(
+            '{"33":1,"40":0,"61":1,"69":0,"150":1,"156":0,"182":1,"190":0,"207":1,"216":0,"225":1,"254":0,"266":1,"275":0,"300":1,"389":0,"417":1,"425":0,"441":1,"511":0,"535":1,"625":0,"650":1,"662":0,"674":1,"741":0,"768":1,"857":0,"878":1,"887":0,"1213":1,"1221":0,"1250":1,"1258":0,"1310":1,"1317":0,"1367":1,"1376":0,"1488":1,"1504":0,"1542":1,"1549":0,"1595":1,"1602":0,"1681":1,"1688":0,"1767":1,"1775":0,"1919":1,"1929":0,"1941":1,"1951":0,"2016":1,"2026":0,"2105":1,"2114":0,"2131":1,"2141":0,"2160":1,"2169":0,"2188":1,"2197":0,"2217":1,"2226":0,"2248":1,"2257":0,"2312":1,"2319":0,"2328":1,"2338":0,"2349":1,"2358":0,"2376":1,"2384":0,"2422":1,"2429":0,"2445":1,"2452":0,"2492":1,"2501":0,"2518":1,"2526":0,"2608":1,"2616":0,"2622":1,"2630":0,"2634":1,"2641":0,"2800":1,"2808":0,"2840":1,"2848":0,"2874":1,"2883":0,"2938":1,"2946":0,"2979":1,"2988":0,"3029":1,"3038":0,"3072":1,"3081":0,"3096":1,"3109":0,"3215":1,"3223":0,"3276":1,"3342":0,"3379":1,"3390":0,"3441":1,"3451":0,"3483":1,"3491":0,"3557":1,"3568":0,"3713":1,"3721":0,"3746":1,"3755":0,"3788":1,"3796":0,"3807":1,"3817":0,"3833":1,"3871":0,"3918":1,"3927":0,"3937":1,"3948":0,"3973":1,"3984":0,"3995":1,"4005":0,"4033":1,"4044":0,"4088":1,"4097":0,"4118":1,"4127":0,"4143":1,"4154":0,"4172":1,"4185":0,"4235":1,"4245":0,"4276":1,"4285":0,"4304":1,"4314":0,"4400":1,"4411":0,"4439":1,"4448":0,"4480":1,"4493":0,"4504":1,"4515":0,"4536":1,"4546":0,"4605":1,"4610":0,"4630":1,"4687":0,"4826":1,"4836":0,"4931":1,"4939":0,"5164":1,"5172":0,"5203":1,"5211":0,"5260":1,"5266":0,"5314":1,"5325":0,"5398":1,"5406":0,"5426":1,"5441":0,"5482":1,"5494":0,"5544":1,"5553":0,"5830":1,"5897":0,"6032":1,"6093":0,"6207":1,"6217":0,"6262":1,"6269":0,"6314":1,"6321":0,"6367":1,"6375":0,"6421":1,"6431":0,"6498":1,"6508":0,"6672":1,"6679":0,"6787":1,"6795":0,"6881":1,"6916":0,"6993":1,"7002":0,"7011":1,"7023":0,"7091":1,"7099":0,"7136":1,"7146":0,"7157":1,"7167":0,"7224":1,"7235":0,"7254":1,"7263":0,"7283":1,"7292":0,"7358":1,"7364":0,"7423":1,"7432":0,"7452":1,"7461":0,"7481":1,"7491":0,"7519":1,"7527":0,"7547":1,"7556":0,"7587":1,"7595":0,"7716":1,"7724":0,"7768":1,"7775":0,"7791":1,"7800":0,"7817":1,"7827":0,"7843":1,"7851":0,"7891":1,"7899":0,"7928":1,"7935":0,"7955":1,"7965":0,"8018":1,"8026":0,"8036":1,"8044":0,"8063":1,"8071":0,"8102":1,"8111":0,"8142":1,"8148":0,"8253":1,"8260":0,"8286":1,"8293":0,"8359":1,"8365":0,"8374":1,"8404":0,"8449":1,"8455":0,"8523":1,"8532":0,"8563":1,"8572":0}',
+          ),
+          nf = JSON.parse(
+            '{"83":1,"92":0,"136":1,"143":0,"182":1,"191":0,"229":1,"265":0,"310":1,"319":0,"334":1,"343":0,"356":1,"368":0,"389":1,"400":0,"431":1,"457":0,"475":1,"483":0,"491":1,"500":0,"527":1,"535":0,"557":1,"567":0,"599":1,"609":0,"654":1,"663":0,"698":1,"708":0,"770":1,"779":0,"787":1,"796":0,"816":1,"825":0,"837":1,"846":0,"860":1,"870":0,"885":1,"893":0,"927":1,"935":0,"950":1,"960":0,"979":1,"1033":0,"1052":1,"1057":1,"1061":0,"1066":0,"1078":1,"1137":0,"1173":1,"1183":0,"1195":1,"1204":0,"1217":1,"1227":0,"1242":1,"1252":0,"1265":1,"1274":0,"1302":1,"1328":0,"1344":1,"1352":0,"1377":1,"1388":0,"1409":1,"1418":0,"1440":1,"1448":0,"1472":1,"1483":0,"1505":1,"1514":0,"1558":1,"1569":0,"1591":1,"1601":0,"1627":1,"1636":0,"1650":1,"1660":0,"1685":1,"1695":0,"1723":1,"1732":0,"1756":1,"1765":0,"1777":1,"1787":0,"1798":1,"1808":0,"1824":1,"1834":0,"1846":1,"1856":0,"1869":1,"1878":0,"1891":1,"1901":0,"1945":1,"1955":0,"1994":1,"2004":0,"2021":1,"2030":0,"2046":1,"2055":0,"2075":1,"2085":0,"2092":1,"2102":0,"2135":1,"2144":0,"2156":1,"2158":1,"2165":0,"2169":0,"2180":1,"2188":0,"2204":1,"2212":0,"2227":1,"2235":0,"2252":1,"2260":0,"2275":1,"2283":0,"2449":1,"2457":0,"2500":1,"2508":0,"2537":1,"2545":0,"2599":1,"2606":0,"2631":1,"2639":0,"2667":1,"2674":0,"2724":1,"2777":0,"2845":1,"2853":0,"2878":1,"2887":0,"2922":1,"2932":0,"2956":1,"2963":0,"2989":1,"2999":0,"3012":1,"3020":0,"3032":1,"3040":0,"3047":1,"3057":0,"3098":1,"3145":1,"3178":0,"3216":1,"3248":0,"3267":1,"3302":0,"3361":1,"3392":0,"3443":1,"3524":0,"3554":1,"3582":0,"3620":1,"3631":0,"3648":1,"3653":0,"3658":1,"3662":0,"3667":1,"3671":0,"3675":1,"3680":0,"3685":1,"3689":0,"3695":1,"3699":0,"3705":1,"3708":0,"3714":1,"3719":0,"3724":1,"3729":0,"3732":1,"3738":0,"3869":1,"3875":0,"3909":1,"3916":0,"3931":1,"3939":0,"3969":1,"3977":0,"3990":1,"3999":0,"4043":1,"4049":0,"4080":1,"4088":0,"4118":1,"4128":0,"4164":1,"4173":0,"4204":1,"4212":0,"4267":1,"4274":0,"4292":1,"4300":0,"4316":1,"4324":0,"4340":1,"4348":0,"4360":1,"4375":0,"4388":1,"4456":0,"4480":1,"4503":0,"4537":1,"4544":0,"4576":1,"4584":0,"4657":1,"4663":0,"4685":1,"4689":1,"4693":0,"4712":1,"4720":0,"4741":1,"4748":0,"4776":1,"4785":0,"4844":1,"4853":0,"4881":1,"4889":0,"4908":1,"4916":0,"4940":1,"4948":0,"4991":1,"4998":0,"5035":1,"5042":0,"5075":1,"5084":0,"5106":1,"5115":0,"5127":1,"5173":0,"5217":1,"5221":0,"5272":1,"5280":0,"5332":1,"5340":0,"5395":1,"5422":0,"5452":1,"5464":0,"5483":1,"5509":0,"5540":1,"5552":0,"5575":1,"5586":0,"5597":1,"5629":0,"5649":1,"5657":0,"5672":1,"5684":0,"5714":1,"5721":0,"5733":1,"5742":0,"5771":1,"5780":0,"5804":1,"5810":0,"5814":1,"5840":0,"5857":1,"5870":0,"5894":1,"5906":0,"5921":1,"6002":0,"6012":1,"6017":0,"6021":1,"6027":0,"6068":1,"6073":0,"6079":1,"6083":0,"6087":1,"6092":0,"6185":1,"6197":0,"6220":1,"6254":0,"6280":1,"6295":0,"6326":1,"6334":0,"6377":1,"6386":0,"6422":1,"6431":0,"6474":1,"6482":0,"6531":1,"6540":0,"6598":1,"6616":0,"6643":1,"6652":0,"6696":1,"6708":0,"6722":1,"6732":0,"6760":1,"6843":0,"6863":1,"6871":0,"6993":1,"7000":0,"7023":1,"7030":0,"7083":1,"7091":0,"7124":1,"7132":0,"7155":1,"7164":0,"7196":1,"7203":0,"7239":1,"7284":0,"7302":1,"7337":0,"7388":1,"7395":0,"7414":1,"7422":0,"7457":1,"7465":0,"7494":1,"7502":0,"7512":1,"7525":0,"7968":1,"8004":0,"8054":1,"8062":0,"8087":1,"8094":0,"8144":1,"8151":0,"8174":1,"8182":0,"8192":1,"8254":0,"8260":1,"8334":0,"8401":1,"8407":0,"8428":1,"8437":0,"8465":1,"8472":0,"8502":1,"8508":0,"8573":1,"8583":0,"8603":1,"8609":0,"8683":1,"8690":0,"8709":1,"8710":1,"8720":0,"8722":0,"8767":1,"8777":0,"8804":1,"8815":0,"8856":1,"8869":0,"8907":1,"8918":0,"8995":1,"9002":0,"9025":1,"9032":0,"9060":1,"9070":0,"9136":1,"9143":0,"9185":1,"9192":0,"9252":1,"9263":0,"9305":1,"9313":0,"9378":1,"9386":0,"9406":1,"9414":0,"9479":1,"9490":0,"9505":1,"9514":0,"9595":1,"9604":0,"9622":1,"9629":0,"9649":1,"9659":0,"9681":1,"9693":0,"9718":1,"9727":0,"9744":1,"9752":0,"9772":1,"9780":0,"9804":1,"9815":0,"10051":1,"10064":0,"10075":1,"10078":1,"10087":0,"10088":0,"10107":1,"10122":0,"10151":1,"10161":0,"10181":1,"10193":0,"10216":1,"10226":0,"10237":1,"10245":0,"10261":1,"10270":0,"10287":1,"10296":0,"10314":1,"10324":0,"10340":1,"10355":0,"10369":1,"10427":0,"10438":1,"10454":0,"10468":1,"10478":0,"10491":1,"10502":0,"10518":1,"10537":0,"10558":1,"10564":0,"10574":1,"10585":0,"10604":1,"10619":0,"10627":1,"10635":0,"10668":1,"10678":0,"10690":1,"10700":0,"10770":1,"10780":0,"10795":1,"10848":1,"10855":0,"10856":0,"10882":1,"10892":0,"10909":1,"10919":0,"10948":1,"10957":0,"10973":1,"10982":0,"11030":1,"11049":0,"11085":1,"11103":0,"11139":1,"11155":0,"11201":1,"11208":0,"11243":1,"11255":0,"11294":1,"11311":0,"11350":1,"11360":0,"11390":1,"11397":0,"11415":1,"11425":0,"11488":1,"11500":0}',
+          ),
+          sf = JSON.parse(
+            '{"122":1,"133":0,"168":1,"179":0,"218":1,"227":0,"263":1,"273":0,"293":1,"303":0,"331":1,"341":0,"371":1,"381":0,"428":1,"438":0,"464":1,"493":0,"513":1,"522":0,"543":1,"552":0,"571":1,"581":0,"702":1,"713":0,"848":1,"856":0,"876":1,"885":0,"905":1,"914":0,"943":1,"952":0,"982":1,"1008":0,"1059":1,"1068":0,"1108":1,"1117":0,"1135":1,"1145":0,"1176":1,"1187":0,"1220":1,"1229":0,"1344":1,"1352":0,"1430":1,"1438":0,"1513":1,"1521":0,"1603":1,"1610":0,"1693":1,"1703":0,"1774":1,"1786":0,"1866":1,"1876":0,"1949":1,"1960":0,"2041":1,"2051":0,"2122":1,"2132":0,"2213":1,"2224":0,"2297":1,"2306":0,"2388":1,"2396":0,"2471":1,"2478":0,"2560":1,"2569":0,"2689":1,"2696":0,"2881":1,"2891":0,"2929":1,"2938":0,"3029":1,"3035":0,"3067":1,"3073":0,"3104":1,"3111":0,"3190":1,"3199":0,"3277":1,"3284":0,"3392":1,"3400":0,"3480":1,"3490":0,"3536":1,"3542":0,"3570":1,"3573":1,"3580":0,"3631":1,"3639":0,"3658":1,"3665":0,"3700":1,"3709":0,"3756":1,"3765":0,"3879":1,"3886":0,"3903":1,"3911":0,"4079":1,"4088":0,"4165":1,"4174":0,"4192":1,"4201":0,"4277":1,"4285":0,"4322":1,"4330":0,"4376":1,"4386":0,"4424":1,"4432":0,"4451":1,"4460":0,"4487":1,"4497":0,"4532":1,"4541":0,"4558":1,"4568":0,"4611":1,"4621":0,"4654":1,"4662":0,"4733":1,"4742":0,"4770":1,"4780":0,"4816":1,"4825":0,"4869":1,"4878":0,"4892":1,"4901":0,"4935":1,"4945":0,"4975":1,"4986":0,"5009":1,"5016":0,"5063":1,"5071":0,"5096":1,"5104":0,"5134":1,"5142":0,"5164":1,"5171":0,"5207":1,"5216":0}',
+          ),
+          of = JSON.parse(
+            '{"70":1,"187":0,"293":1,"317":0,"322":1,"352":0,"455":1,"476":0,"567":1,"611":0,"699":1,"730":0,"734":1,"765":0,"804":1,"835":0,"906":1,"926":0,"976":1,"986":0,"1051":1,"1076":0,"1169":1,"1187":0,"1225":1,"1338":0,"1343":1,"1369":0,"1473":1,"1495":0,"1499":1,"1530":0,"1575":1,"1595":0,"1643":1,"1671":0,"1677":1,"1709":0,"1731":1,"1748":0,"1754":1,"1785":0,"1824":1,"1847":0,"1912":1,"1926":0,"1959":1,"1967":0,"1998":1,"2004":0,"2036":1,"2053":0,"2094":1,"2108":0,"2128":1,"2141":0,"2144":1,"2173":0,"2187":1,"2203":0,"2252":1,"2258":0,"2330":1,"2359":0,"2362":1,"2390":0,"2435":1,"2459":0,"2493":1,"2513":0,"2518":1,"2545":0,"2555":1,"2562":0,"2592":1,"2617":0,"2666":1,"2723":0,"2785":1,"2804":0,"2849":1,"2880":0,"2932":1,"2939":0,"2963":1,"2971":0,"2999":1,"3007":0,"3136":1,"3148":0,"3244":1,"3260":0,"3338":1,"3346":0,"3404":1,"3427":0,"3529":1,"3552":0,"3657":1,"3669":0,"3673":1,"3701":0,"3769":1,"3777":0,"3811":1,"3821":0,"3858":1,"3866":0,"3975":1,"3990":0,"4025":1,"4050":0,"4095":1,"4134":0,"4182":1,"4215":0,"4262":1,"4305":0,"4348":1,"4371":0,"4411":1,"4423":0,"4458":1,"4469":0,"4499":1,"4505":0,"4538":1,"4545":0,"4578":1,"4589":0,"4623":1,"4628":0,"4734":1,"4762":0,"4773":1,"4794":0,"4923":1,"4985":0,"5023":1,"5033":0,"5073":1,"5078":0,"5145":1,"5171":0,"5198":1,"5203":0,"5263":1,"5278":0,"5362":1,"5367":0,"5396":1,"5402":0,"5446":1,"5453":0,"5497":1,"5503":0,"5559":1,"5587":0,"5630":1,"5637":0,"5661":1,"5670":0,"5717":1,"5730":0,"5758":1,"5791":0,"5805":1,"5823":0,"5846":1,"5868":0,"5932":1,"5950":0,"5975":1,"5998":0,"6023":1,"6036":0,"6166":1,"6178":0,"6192":1,"6351":0,"6365":1,"6383":0,"6447":1,"6465":0,"6475":1,"6503":0,"6583":1,"6588":0,"6618":1,"6625":0,"6655":1,"6672":0,"6687":1,"6811":0,"6853":1,"6876":0,"6912":1,"6925":0,"6995":1,"7022":0,"7134":1,"7162":0,"7234":1,"7248":0,"7317":1,"7328":0,"7423":1,"7436":0,"7471":1,"7535":0,"7564":1,"7603":0,"7631":1,"7654":0,"7659":1,"7692":0,"7710":1,"7735":0,"7767":1,"7809":0,"7844":1,"7855":0,"7859":1,"7889":0,"7897":1,"7917":0,"7924":1,"7953":0,"7995":1,"8023":0,"8068":1,"8086":0,"8117":1,"8130":0,"8135":1,"8161":0,"8271":1,"8286":0,"8324":1,"8341":0,"8347":1,"8375":0,"8394":1,"8412":0,"8505":1,"8512":0,"8640":1,"8668":0,"8675":1,"8681":0,"8712":1,"8724":0,"8776":1,"8791":0,"8812":1,"8867":0,"8871":1,"8902":0,"8960":1,"8966":0,"9002":1,"9010":0,"9014":1,"9041":0}',
+          ),
+          rf = JSON.parse(
+            '{"87":1,"94":0,"134":1,"141":0,"227":1,"234":0,"410":1,"417":0,"531":1,"541":0,"564":1,"635":0,"704":1,"714":0,"781":1,"789":0,"841":1,"852":0,"904":1,"914":0,"999":1,"1008":0,"1022":1,"1032":0,"1076":1,"1086":0,"1156":1,"1165":0,"1187":1,"1197":0,"1271":1,"1281":0,"1326":1,"1336":0,"1360":1,"1420":0,"1527":1,"1536":0,"1588":1,"1598":0,"1652":1,"1660":0,"1700":1,"1709":0,"1789":1,"1797":0,"1809":1,"1820":0,"1850":1,"1859":0,"1880":1,"1888":0,"1907":1,"1915":0,"1930":1,"1941":0,"2034":1,"2043":0,"2068":1,"2078":0,"2101":1,"2109":0,"2123":1,"2133":0,"2157":1,"2163":0,"2228":1,"2237":0,"2250":1,"2262":0,"2300":1,"2311":0,"2333":1,"2339":0,"2348":1,"2360":0,"2403":1,"2411":0,"2440":1,"2446":0,"2470":1,"2478":0,"2738":1,"2747":0,"2789":1,"2866":0,"2922":1,"2935":0,"3022":1,"3031":0,"3065":1,"3127":0,"3162":1,"3172":0,"3360":1,"3526":0,"3559":1,"3570":0,"3669":1,"3677":0,"3780":1,"3789":0,"3815":1,"3824":0,"3885":1,"3893":0,"3949":1,"3997":0,"4059":1,"4069":0,"4116":1,"4128":0,"4156":1,"4165":0,"4195":1,"4209":0,"4227":1,"4240":0,"4277":1,"4286":0,"4316":1,"4323":0,"4406":1,"4413":0,"4421":1,"4431":0,"4474":1,"4483":0,"4504":1,"4512":0,"4543":1,"4617":0,"4650":1,"4661":0,"4718":1,"4725":0,"4823":1,"4832":0,"4865":1,"4886":0,"4966":1,"4972":0,"5028":1,"5035":0,"5108":1,"5116":0,"5190":1,"5198":0,"5225":1,"5234":0,"5260":1,"5269":0,"5340":1,"5347":0,"5356":1,"5365":0,"5438":1,"5446":0,"5519":1,"5527":0,"5562":1,"5569":0,"5662":1,"5670":0,"6062":1,"6071":0,"6175":1,"6181":0,"6264":1,"6326":0,"6364":1,"6373":0,"6415":1,"6517":0,"6556":1,"6604":0,"6634":1,"6694":0,"6735":1,"6744":0,"6875":1,"6883":0,"7017":1,"7024":0,"7059":1,"7067":0,"7116":1,"7123":0,"7160":1,"7167":0,"7194":1,"7201":0,"7212":1,"7223":0,"7251":1,"7258":0,"7265":1,"7272":0,"7348":1,"7356":0,"7511":1,"7518":0,"7557":1,"7563":0,"7616":1,"7623":0,"7728":1,"7735":0,"7792":1,"7800":0,"7861":1,"7869":0,"7919":1,"7927":0,"8011":1,"8019":0,"8068":1,"8186":0,"8235":1,"8244":0,"8600":1,"8609":0,"8728":1,"8738":0,"8914":1,"8921":0,"8945":1,"8956":0,"8998":1,"9006":0,"9187":1,"9195":0,"9325":1,"9332":0,"9386":1,"9394":0,"9450":1,"9456":0,"9590":1,"9597":0,"9644":1,"9652":0,"9701":1,"9708":0,"9758":1,"9764":0,"9849":1,"9856":0,"9916":1,"9925":0,"9953":1,"9961":0,"9985":1,"9991":0,"10141":1,"10151":0,"10213":1,"10220":0,"10263":1,"10273":0,"10331":1,"10341":0,"10480":1,"10487":0}',
+          ),
+          lf = JSON.parse(
+            '{"101":1,"109":0,"336":1,"344":0,"539":1,"549":0,"709":1,"717":0,"801":1,"810":0,"900":1,"910":0,"913":1,"932":0,"969":1,"1001":0,"1038":1,"1099":0,"1222":1,"1232":0,"1264":1,"1301":0,"1363":1,"1374":0,"1414":1,"1423":0,"1451":1,"1459":0,"1483":1,"1518":0,"1613":1,"1622":0,"1680":1,"1688":0,"1826":1,"1836":0,"1895":1,"1906":0,"1970":1,"1980":0,"2004":1,"2013":0,"2116":1,"2126":0,"2169":1,"2225":0,"2335":1,"2345":0,"2392":1,"2402":0,"2435":1,"2446":0,"2470":1,"2480":0,"2557":1,"2565":0,"2617":1,"2627":0,"2800":1,"2809":0,"2840":1,"2852":0,"2910":1,"2921":0,"2956":1,"2965":0,"2991":1,"3018":0,"3104":1,"3113":0,"3117":1,"3138":0,"3192":1,"3203":0,"3228":1,"3240":0,"3293":1,"3304":0,"3319":1,"3329":0,"3341":1,"3353":0,"3467":1,"3478":0,"3513":1,"3527":0,"3542":1,"3552":0,"3650":1,"3658":0,"3707":1,"3715":0,"3763":1,"3771":0,"3817":1,"3827":0,"3876":1,"3885":0,"3930":1,"3940":0,"4103":1,"4113":0,"4180":1,"4191":0,"4224":1,"4234":0,"4270":1,"4279":0,"4328":1,"4339":0,"4402":1,"4412":0,"4535":1,"4543":0,"4576":1,"4584":0,"4620":1,"4629":0,"4648":1,"4694":0,"4785":1,"4793":0,"4890":1,"4901":0,"5106":1,"5116":0,"5169":1,"5178":0,"5238":1,"5246":0,"5316":1,"5325":0,"5395":1,"5406":0,"5452":1,"5464":0,"5621":1,"5635":0,"5677":1,"5687":0,"5772":1,"5780":0,"5919":1,"5930":0,"5991":1,"6001":0,"6026":1,"6035":0,"6148":1,"6159":0,"6202":1,"6216":0,"6257":1,"6268":0,"6302":1,"6393":0,"6432":1,"6443":0,"6469":1,"6479":0,"6497":1,"6507":0,"6619":1,"6633":0,"6761":1,"6827":0,"6881":1,"6891":0,"6912":1,"6923":0,"6962":1,"6971":0,"7044":1,"7054":0,"7088":1,"7097":0,"7220":1,"7228":0,"7240":1,"7251":0,"7296":1,"7305":0,"7324":1,"7336":0,"7346":1,"7355":0,"7460":1,"7468":0,"7498":1,"7507":0,"7672":1,"7681":0,"7720":1,"7729":0,"7748":1,"7759":0,"7797":1,"7808":0,"7821":1,"7837":0,"7874":1,"7885":0,"7979":1,"7992":0,"8030":1,"8040":0,"8069":1,"8077":0,"8114":1,"8125":0,"8174":1,"8183":0,"8246":1,"8259":0,"8332":1,"8342":0,"8382":1,"8389":0,"8424":1,"8432":0,"8454":1,"8462":0,"8568":1,"8577":0,"8605":1,"8614":0,"8639":1,"8649":0,"8671":1,"8682":0,"8709":1,"8719":0,"8747":1,"8759":0,"8808":1,"8817":0,"8858":1,"8867":0,"8902":1,"8911":0,"8932":1,"8964":0,"9055":1,"9064":0,"9108":1,"9120":0,"9159":1,"9169":0,"9188":1,"9200":0,"9264":1,"9274":0,"9296":1,"9304":0,"9331":1,"9397":0,"9672":1,"9681":0}',
+          ),
+          cf = JSON.parse(
+            '{"148":1,"184":0,"371":1,"408":0,"586":1,"594":0,"618":1,"625":0,"708":1,"715":0,"818":1,"838":0,"849":1,"856":0,"1016":1,"1057":0,"1083":1,"1090":0,"1115":1,"1121":0,"1146":1,"1151":0,"1239":1,"1293":0,"1324":1,"1333":0,"1446":1,"1452":0,"1465":1,"1472":0,"1533":1,"1569":0,"1606":1,"1615":0,"1680":1,"1685":0,"1732":1,"1796":0,"1947":1,"1952":0,"1999":1,"2007":0,"2035":1,"2041":0,"2128":1,"2135":0,"2174":1,"2181":0,"2230":1,"2295":0,"2397":1,"2401":0,"2486":1,"2494":0,"2514":1,"2520":0,"2594":1,"2600":0,"2624":1,"2630":0,"2816":1,"2832":0,"2845":1,"2851":0,"2904":1,"2911":0,"2963":1,"2969":0,"3016":1,"3022":0,"3044":1,"3051":0,"3099":1,"3106":0,"3135":1,"3143":0,"3210":1,"3217":0,"3331":1,"3337":0,"3362":1,"3370":0,"3426":1,"3432":0,"3465":1,"3473":0,"3773":1,"3779":0,"3807":1,"3813":0,"3835":1,"3841":0,"3921":1,"3929":0,"3975":1,"3984":0,"4032":1,"4039":0,"4057":1,"4066":0,"4145":1,"4153":0,"4196":1,"4231":0,"4247":1,"4256":0,"4393":1,"4431":0,"4449":1,"4458":0,"4480":1,"4488":0,"4595":1,"4603":0,"4635":1,"4643":0,"4662":1,"4669":0,"4811":1,"4873":0,"4904":1,"4915":0,"4968":1,"4977":0,"4992":1,"5002":0,"5079":1,"5086":0,"5134":1,"5142":0,"5239":1,"5248":0,"5273":1,"5281":0,"5292":1,"5300":0,"5321":1,"5330":0,"5373":1,"5378":0,"5483":1,"5490":0,"5514":1,"5522":0,"5577":1,"5583":0,"5622":1,"5628":0,"5652":1,"5659":0,"5710":1,"5716":0,"5740":1,"5747":0,"5838":1,"5847":0,"5937":1,"5974":0,"5996":1,"6004":0,"6053":1,"6059":0,"6079":1,"6087":0,"6109":1,"6116":0,"6142":1,"6150":0,"6193":1,"6201":0,"6391":1,"6396":0,"6411":1,"6428":0,"6482":1,"6488":0,"6514":1,"6520":0,"6584":1,"6600":0,"6617":1,"6623":0,"6646":1,"6651":0,"6662":1,"6668":0,"6728":1,"6734":0,"6792":1,"6803":0,"6838":1,"6846":0,"6866":1,"6875":0,"6926":1,"6934":0,"6955":1,"6962":0,"6987":1,"6993":0,"7016":1,"7022":0,"7059":1,"7065":0,"7075":1,"7082":0,"7128":1,"7138":0,"7342":1,"7348":0,"7372":1,"7378":0,"7404":1,"7411":0,"7444":1,"7453":0,"7469":1,"7479":0,"7514":1,"7518":0,"7527":1,"7533":0,"7567":1,"7577":0,"7601":1,"7639":0,"7684":1,"7694":0,"7717":1,"7724":0,"7743":1,"7751":0,"7778":1,"7797":0,"7848":1,"7857":0,"7946":1,"7953":0,"7971":1,"7980":0,"8005":1,"8012":0,"8024":1,"8030":0,"8138":1,"8145":0,"8192":1,"8197":0,"8227":1,"8233":0,"8252":1,"8260":0,"8303":1,"8310":0,"8329":1,"8336":0,"8360":1,"8365":0,"8404":1,"8410":0,"8441":1,"8448":0,"8472":1,"8477":0,"8693":1,"8712":0,"8748":1,"8754":0,"8777":1,"8785":0,"8807":1,"8815":0,"8842":1,"8851":0,"8882":1,"8891":0,"8916":1,"8956":0,"8963":1,"8971":0,"9335":1,"9347":0,"9428":1,"9439":0,"9456":1,"9463":0}'          
+          ),
+          df = JSON.parse(
+            '{"131":1,"137":0,"152":1,"158":0,"205":1,"212":0,"283":1,"289":0,"320":1,"327":0,"348":1,"355":0,"387":1,"393":0,"427":1,"434":0,"460":1,"468":0,"493":1,"501":0,"513":1,"520":0,"571":1,"577":0,"593":1,"600":0,"618":1,"625":0,"634":1,"641":0,"665":1,"673":0,"698":1,"705":0,"761":1,"767":0,"778":1,"786":0,"859":1,"867":0,"883":1,"890":0,"904":1,"911":0,"922":1,"929":0,"945":1,"954":0,"964":1,"972":0,"991":1,"999":0,"1049":1,"1056":0,"1066":1,"1073":0,"1093":1,"1101":0,"1145":1,"1153":0,"1168":1,"1175":0,"1192":1,"1199":0,"1210":1,"1217":0,"1228":1,"1254":0,"1278":1,"1285":0,"1331":1,"1339":0,"1353":1,"1360":0,"1376":1,"1383":0,"1431":1,"1439":0,"1477":1,"1484":0,"1495":1,"1502":0,"1511":1,"1518":0,"1530":1,"1538":0,"1564":1,"1570":0,"1644":1,"1651":0,"1665":1,"1672":0,"1683":1,"1690":0,"1703":1,"1710":0,"1744":1,"1752":0,"1780":1,"1785":0,"1789":1,"1797":0,"1814":1,"1819":0,"1823":1,"1829":0,"1846":1,"1851":0,"1857":1,"1862":0,"1874":1,"1881":0,"1895":1,"1904":0,"1914":1,"1924":0,"2008":1,"2015":0,"2021":1,"2029":0,"2045":1,"2052":0,"2062":1,"2068":0,"2085":1,"2091":0,"2097":1,"2103":0,"2125":1,"2132":0,"2151":1,"2157":0,"2166":1,"2172":0,"2189":1,"2196":0,"2202":1,"2209":0,"2226":1,"2232":0,"2238":1,"2244":0,"2260":1,"2267":0,"2291":1,"2299":0,"2310":1,"2317":0,"2327":1,"2334":0,"2362":1,"2369":0,"2375":1,"2384":0,"2404":1,"2410":0,"2418":1,"2425":0,"2444":1,"2451":0,"2477":1,"2484":0,"2508":1,"2516":0,"2530":1,"2538":0,"2579":1,"2587":0,"2595":1,"2638":0,"2670":1,"2677":0,"2688":1,"2697":0,"2728":1,"2735":0,"2740":1,"2747":0,"2761":1,"2769":0,"2783":1,"2791":0,"2804":1,"2811":0,"2819":1,"2827":0,"2834":1,"2841":0,"2848":1,"2855":0,"2870":1,"2878":0,"2891":1,"2899":0,"2905":1,"2914":0,"2936":1,"2943":0,"2973":1,"2980":0,"2993":1,"3000":0,"3009":1,"3017":0,"3047":1,"3056":0,"3081":1,"3091":0,"3117":1,"3124":0,"3210":1,"3215":0,"3219":1,"3226":0,"3250":1,"3255":0,"3259":1,"3266":0,"3303":1,"3311":0,"3348":1,"3354":0,"3362":1,"3369":0,"3398":1,"3404":0,"3412":1,"3419":0,"3428":1,"3437":0,"3448":1,"3455":0,"3500":1,"3505":0,"3510":1,"3518":0,"3529":1,"3536":0,"3539":1,"3546":0,"3592":1,"3599":0,"3620":1,"3627":0,"3640":1,"3646":0,"3651":1,"3659":0,"3674":1,"3682":0,"3734":1,"3739":0,"3745":1,"3752":0,"3766":1,"3774":0,"3782":1,"3790":0,"3800":1,"3808":0,"3821":1,"3845":0,"3867":1,"3874":0,"3899":1,"3907":0,"3920":1,"3928":0,"3938":1,"3946":0,"3960":1,"3968":0,"4020":1,"4028":0,"4063":1,"4070":0,"4081":1,"4089":0,"4098":1,"4106":0,"4110":1,"4114":1,"4124":0,"4151":1,"4159":0,"4209":1,"4217":0,"4228":1,"4237":0,"4244":1,"4250":0,"4255":1,"4263":0,"4306":1,"4313":0,"4326":1,"4333":0,"4353":1,"4359":0,"4370":1,"4377":0,"4385":1,"4393":0,"4408":1,"4421":0,"4440":1,"4448":0,"4463":1,"4471":0,"4495":1,"4502":0,"4513":1,"4521":0,"4542":1,"4550":0,"4583":1,"4589":0,"4592":1,"4601":0,"4638":1,"4646":0,"4655":1,"4662":0,"4669":1,"4677":0,"4691":1,"4701":0,"4722":1,"4730":0,"4742":1,"4751":0,"4764":1,"4808":0,"4825":1,"4832":0,"4836":1,"4844":0,"4849":1,"4898":0,"4925":1,"4931":0,"4937":1,"4945":0,"4970":1,"4976":0,"4982":1,"4990":0,"5013":1,"5020":0,"5033":1,"5041":0,"5056":1,"5065":0,"5079":1,"5087":0,"5104":1,"5112":0,"5126":1,"5135":0,"5152":1,"5159":0,"5162":1,"5170":0,"5184":1,"5190":0,"5194":1,"5200":0,"5239":1,"5248":0,"5310":1,"5317":0,"5327":1,"5333":0,"5337":1,"5342":0,"5347":1,"5354":0,"5364":1,"5372":0,"5382":1,"5391":0,"5400":1,"5409":0,"5417":1,"5426":0,"5437":1,"5444":0,"5449":1,"5457":0,"5471":1,"5479":0,"5492":1,"5500":0,"5507":1,"5515":0,"5538":1,"5544":0,"5548":1,"5557":0,"5564":1,"5572":0,"5581":1,"5587":0,"5593":1,"5600":0,"5616":1,"5623":0,"5633":1,"5642":0,"5652":1,"5660":0,"5670":1,"5676":0,"5680":1,"5688":0,"5702":1,"5711":0,"5722":1,"5730":0,"5735":1,"5743":0,"5757":1,"5765":0,"5778":1,"5785":0,"5792":1,"5798":0,"5812":1,"5820":0,"5829":1,"5836":0,"5846":1,"5854":0,"5863":1,"5869":0,"5882":1,"5891":0,"5919":1,"5927":0,"5932":1,"5939":0,"5944":1,"5952":0,"5970":1,"5983":0,"5989":1,"6011":0,"6022":1,"6030":0,"6062":1,"6069":0,"6074":1,"6080":0,"6085":1,"6093":0,"6106":1,"6111":0,"6116":1,"6122":0,"6142":1,"6147":0,"6152":1,"6158":0,"6169":1,"6175":0,"6182":1,"6190":0,"6205":1,"6212":0,"6218":1,"6227":0,"6241":1,"6246":0,"6254":1,"6261":0,"6276":1,"6284":0,"6312":1,"6322":0,"6370":1,"6376":0,"6465":1,"6471":0,"6477":1,"6486":0,"6502":1,"6507":0,"6513":1,"6520":0,"6536":1,"6541":0,"6547":1,"6555":0,"6572":1,"6577":0,"6582":1,"6589":0,"6610":1,"6617":0,"6644":1,"6650":0,"6655":1,"6662":0,"6680":1,"6686":0,"6690":1,"6697":0,"6717":1,"6725":0,"6751":1,"6757":0,"6762":1,"6770":0,"6788":1,"6794":0,"6798":1,"6806":0,"6822":1,"6830":0,"6853":1,"6862":0,"6874":1,"6882":0,"6894":1,"6902":0,"6917":1,"6928":0,"6936":1,"6944":0,"6951":1,"6959":0,"6965":1,"6972":0,"6980":1,"6986":0,"6990":1,"6996":0,"7037":1,"7043":0,"7048":1,"7055":0,"7073":1,"7079":0,"7083":1,"7091":0,"7110":1,"7116":0,"7120":1,"7129":0,"7145":1,"7153":0,"7171":1,"7178":0,"7181":1,"7190":0,"7208":1,"7214":0,"7219":1,"7227":0,"7239":1,"7245":0,"7260":1,"7267":0,"7273":1,"7280":0,"7285":1,"7292":0,"7307":1,"7314":0,"7323":1,"7329":0,"7345":1,"7352":0,"7358":1,"7365":0,"7381":1,"7387":0,"7404":1,"7412":0,"7416":1,"7423":0,"7440":1,"7448":0,"7484":1,"7492":0,"7515":1,"7523":0,"7546":1,"7552":0,"7558":1,"7567":0,"7603":1,"7610":0,"7620":1,"7627":0,"7638":1,"7645":0,"7657":1,"7665":0,"7677":1,"7683":0,"7695":1,"7702":0,"7712":1,"7720":0,"7731":1,"7738":0,"7749":1,"7756":0,"7767":1,"7774":0,"7783":1,"7792":0,"7800":1,"7808":0,"7818":1,"7826":0,"7837":1,"7844":0,"7855":1,"7862":0,"7868":1,"7874":0,"7879":1,"7884":0,"7922":1,"7931":0,"7941":1,"7945":1,"7950":0,"7951":0,"7968":1,"7975":0,"7993":1,"8020":0,"8033":1,"8043":0,"8058":1,"8068":0,"8090":1,"8098":0,"8104":1,"8116":0,"8136":1,"8144":0,"8210":1,"8218":0,"8228":1,"8237":0,"8247":1,"8255":0,"8265":1,"8272":0,"8282":1,"8290":0,"8302":1,"8309":0,"8336":1,"8344":0,"8353":1,"8362":0,"8373":1,"8381":0,"8390":1,"8399":0,"8410":1,"8416":0,"8422":1,"8427":0,"8434":1,"8440":0,"8446":1,"8451":0,"8454":1,"8460":0,"8499":1,"8507":0,"8535":1,"8542":0,"8595":1,"8604":0,"8633":1,"8641":0,"8697":1,"8703":0,"8723":1,"8728":0,"8733":1,"8739":0,"8767":1,"8774":0,"8794":1,"8799":0,"8803":1,"8809":0,"8839":1,"8846":0,"8864":1,"8870":0,"8875":1,"8880":0,"8909":1,"8915":0,"8927":1,"8932":0,"8937":1,"8941":0,"8945":1,"8950":0,"8975":1,"8981":0,"8985":1,"8992":0,"9008":1,"9014":0,"9019":1,"9025":0,"9046":1,"9052":0,"9055":1,"9062":0,"9079":1,"9086":0,"9091":1,"9097":0,"9119":1,"9159":0,"9178":1,"9222":0,"9245":1,"9303":0,"9326":1,"9334":0,"9394":1,"9398":0,"9411":1,"9418":0,"9427":1,"9435":0,"9445":1,"9453":0,"9463":1,"9472":0,"9482":1,"9490":0,"9502":1,"9510":0,"9520":1,"9528":0,"9538":1,"9545":0,"9556":1,"9563":0,"9573":1,"9582":0,"9592":1,"9599":0,"9609":1,"9617":0,"9629":1,"9637":0,"9646":1,"9654":0,"9670":1,"9678":0,"9683":1,"9691":0,"9699":1,"9707":0,"9718":1,"9726":0,"9735":1,"9743":0,"9753":1,"9761":0,"9770":1,"9778":0,"9787":1,"9795":0,"9804":1,"9812":0,"9834":1,"9836":1,"9841":0,"9869":1,"9876":0,"9901":1,"9908":0,"9932":1,"9938":0,"9985":1,"9991":0,"9998":1,"10005":0,"10023":1,"10028":0,"10032":1,"10039":0,"10056":1,"10062":0,"10067":1,"10074":0,"10093":1,"10100":0,"10110":1,"10116":0,"10121":1,"10129":0,"10147":1,"10154":0,"10160":1,"10167":0,"10181":1,"10188":0,"10195":1,"10201":0,"10206":1,"10212":0,"10217":1,"10223":0,"10259":1,"10265":0,"10278":1,"10285":0,"10299":1,"10307":0,"10312":1,"10318":0,"10334":1,"10340":0,"10345":1,"10350":1,"10352":0,"10353":0,"10368":1,"10408":0,"10418":1,"10427":0,"10443":1,"10452":0,"10469":1,"10477":0,"10498":1,"10505":0,"10539":1,"10545":0}',
+          ),
+          uf = JSON.parse(
+            '{"111":1,"116":0,"219":1,"225":0,"240":1,"245":0,"272":1,"280":0,"301":1,"306":0,"330":1,"335":0,"353":1,"359":0,"381":1,"387":0,"399":1,"407":0,"419":1,"430":0,"480":1,"541":0,"709":1,"718":0,"765":1,"770":0,"806":1,"810":0,"822":1,"827":0,"841":1,"846":0,"862":1,"868":0,"900":1,"910":0,"927":1,"934":0,"957":1,"963":0,"978":1,"983":0,"1009":1,"1016":0,"1030":1,"1037":0,"1045":1,"1053":0,"1062":1,"1069":0,"1077":1,"1085":0,"1118":1,"1124":0,"1146":1,"1153":0,"1205":1,"1211":0,"1228":1,"1233":0,"1366":1,"1371":0,"1403":1,"1408":0,"1434":1,"1443":0,"1453":1,"1459":0,"1475":1,"1485":0,"1502":1,"1509":0,"1558":1,"1564":0,"1584":1,"1590":0,"1612":1,"1619":0,"1637":1,"1643":0,"1657":1,"1662":0,"1721":1,"1727":0,"1754":1,"1758":0,"1819":1,"1825":0,"1840":1,"1847":0,"1881":1,"1890":0,"1915":1,"1922":0,"1941":1,"1948":0,"2013":1,"2022":0,"2083":1,"2090":0,"2108":1,"2114":0,"2125":1,"2131":0,"2160":1,"2166":0,"2238":1,"2245":0,"2293":1,"2299":0,"2314":1,"2320":0,"2371":1,"2377":0,"2428":1,"2432":0,"2485":1,"2492":0,"2525":1,"2531":0,"2543":1,"2549":0,"2561":1,"2567":0,"2580":1,"2585":0,"2613":1,"2619":0,"2648":1,"2654":0,"2687":1,"2724":0,"2732":1,"2739":0,"2754":1,"2759":0,"2778":1,"2782":0,"2810":1,"2816":0,"2841":1,"2847":0,"2878":1,"2888":0,"2907":1,"2915":0,"2935":1,"2940":0,"2982":1,"2989":0,"3010":1,"3018":0,"3061":1,"3068":0,"3302":1,"3313":0,"3353":1,"3412":0,"3433":1,"3440":0,"3459":1,"3463":0,"3492":1,"3558":0,"3579":1,"3612":0,"3628":1,"3634":0,"3658":1,"3684":0,"3695":1,"3701":0,"3735":1,"3769":0,"3776":1,"3783":0,"3801":1,"3810":0,"3834":1,"3879":0,"3901":1,"3909":0,"3935":1,"3940":0,"3961":1,"3973":0,"3985":1,"3992":0,"4032":1,"4063":0,"4120":1,"4128":0,"4170":1,"4179":0,"4206":1,"4213":0,"4236":1,"4244":0,"4272":1,"4278":0,"4285":1,"4292":0,"4317":1,"4326":0,"4341":1,"4349":0,"4358":1,"4362":0,"4395":1,"4400":0,"4417":1,"4421":0,"4445":1,"4450":0,"4476":1,"4480":0,"4491":1,"4496":0,"4509":1,"4515":0,"4554":1,"4582":0,"4613":1,"4620":0,"4652":1,"4661":0,"4676":1,"4684":0,"4690":1,"4699":0,"4735":1,"4747":0,"4761":1,"4768":0,"4787":1,"4794":0,"4821":1,"4828":0,"4911":1,"4955":0,"5390":1,"5431":0,"5482":1,"5502":0,"5533":1,"5547":0,"5560":1,"5572":0,"5598":1,"5609":0,"5626":1,"5635":0,"5648":1,"5659":0,"5679":1,"5687":0,"5711":1,"5720":0,"5754":1,"5766":0,"5780":1,"5791":0,"5832":1,"5845":0,"5928":1,"5940":0,"5957":1,"5966":0,"5987":1,"6002":0,"6062":1,"6075":0,"6112":1,"6121":0,"6134":1,"6146":0,"6167":1,"6175":0,"6194":1,"6203":0,"6236":1,"6264":0,"6485":1,"6493":0,"6509":1,"6516":0,"6585":1,"6592":0,"6627":1,"6652":0,"6696":1,"6704":0,"6724":1,"6731":0,"6819":1,"6829":0,"6850":1,"6874":0,"6887":1,"6893":0,"6928":1,"6934":0,"6965":1,"6969":0,"6999":1,"7006":0,"7069":1,"7074":0,"7121":1,"7146":0,"7172":1,"7178":0,"7198":1,"7201":0,"7225":1,"7230":0,"7253":1,"7259":0,"7285":1,"7290":0,"7302":1,"7308":0,"7322":1,"7327":0,"7356":1,"7360":0,"7369":1,"7376":0,"7385":1,"7390":0,"7405":1,"7409":0,"7435":1,"7441":0,"7495":1,"7500":0,"7520":1,"7523":0,"7549":1,"7554":0,"7573":1,"7577":0,"7599":1,"7603":0,"7661":1,"7668":0,"7695":1,"7701":0,"7729":1,"7734":0,"7917":1,"7926":0,"7952":1,"7960":0,"7986":1,"7995":0,"8009":1,"8017":0,"8023":1,"8033":0,"8041":1,"8052":0,"8105":1,"8116":0,"8128":1,"8134":0,"8152":1,"8159":0,"8170":1,"8176":0,"8201":1,"8208":0,"8229":1,"8238":0,"8298":1,"8306":0,"8529":1,"8538":0,"8566":1,"8574":0,"8593":1,"8599":0,"8627":1,"8633":0,"8646":1,"8650":0,"8677":1,"8682":0,"8703":1,"8705":0,"8755":1,"8761":0,"8785":1,"8790":0,"8862":1,"8869":0,"8890":1,"8895":0,"8914":1,"8921":0,"8982":1,"8988":0,"9003":1,"9008":0,"9062":1,"9066":0,"9087":1,"9093":0,"9165":1,"9174":0,"9212":1,"9218":0,"9241":1,"9250":0,"9391":1,"9399":0,"9418":1,"9424":0,"9442":1,"9451":0,"9470":1,"9475":0,"9496":1,"9503":0,"9523":1,"9529":0,"9552":1,"9561":0,"9604":1,"9617":0,"9628":1,"9637":0,"9654":1,"9662":0,"9692":1,"9698":0,"9713":1,"9718":0,"9743":1,"9751":0,"9770":1,"9774":0,"9793":1,"9797":0,"9848":1,"9855":0,"9957":1,"9963":0,"9985":1,"9991":0,"10012":1,"10018":0,"10037":1,"10042":0,"10067":1,"10072":0,"10096":1,"10101":0,"10122":1,"10128":0,"10173":1,"10181":0,"10249":1,"10300":0,"10418":1,"10428":0,"10438":1,"10448":0,"10471":1,"10482":0,"10529":1,"10535":0,"10549":1,"10557":0,"10571":1,"10578":0,"10592":1,"10598":0,"10613":1,"10620":0,"10640":1,"10646":0,"10668":1,"10673":0,"10681":1,"10687":0,"10719":1,"10724":0,"10739":1,"10745":0,"10770":1,"10775":0,"10829":1,"10836":0,"10861":1,"10869":0,"10902":1,"10907":0,"10923":1,"10928":0,"10940":1,"10945":0,"10959":1,"10964":0,"10995":1,"11003":0,"11042":1,"11050":0,"11120":1,"11183":0,"11211":1,"11219":0,"11235":1,"11242":0,"11365":1,"11383":0,"11416":1,"11426":0,"11470":1}'
+          ),
+          faAuto = JSON.parse(
+            '{"110":1,"128":0,"140":1,"148":0,"184":1,"189":0,"195":1,"199":0,"214":1,"218":0,"232":1,"237":0,"264":1,"268":0,"281":1,"286":0,"312":1,"317":0,"335":1,"341":0,"368":1,"372":0,"380":1,"384":0,"397":1,"403":0,"425":1,"430":0,"435":1,"441":0,"492":1,"500":0,"517":1,"522":0,"541":1,"545":0,"562":1,"568":0,"592":1,"597":0,"631":1,"637":0,"686":1,"692":0,"700":1,"704":0,"726":1,"730":0,"738":1,"742":0,"794":1,"801":0,"833":1,"839":0,"940":1,"947":0,"964":1,"972":0,"1003":1,"1015":0,"1020":1,"1025":0,"1037":1,"1042":0,"1050":1,"1055":0,"1071":1,"1077":0,"1095":1,"1101":0,"1109":1,"1113":0,"1126":1,"1132":0,"1157":1,"1163":0,"1180":1,"1185":0,"1197":1,"1202":0,"1223":1,"1229":0,"1246":1,"1252":0,"1280":1,"1285":0,"1304":1,"1307":0,"1312":1,"1313":0,"1323":1,"1327":0,"1339":1,"1343":0,"1360":1,"1365":0,"1374":1,"1377":0,"1415":1,"1419":0,"1430":1,"1435":0,"1453":1,"1458":0,"1492":1,"1496":0,"1498":1,"1525":0,"1551":1,"1557":0,"1563":1,"1572":0,"1592":1,"1596":0,"1598":1,"1602":0,"1623":1,"1630":0,"1639":1,"1646":0,"1679":1,"1712":0,"1717":1,"1722":0,"1730":1,"1736":0,"1816":1,"1822":0,"1854":1,"1885":0,"1918":1,"1929":0,"1964":1,"1971":0,"1989":1,"1994":0,"2066":1,"2072":0,"2096":1,"2102":0,"2156":1,"2160":0,"2164":1,"2168":0,"2196":1,"2197":0,"2208":1,"2213":0,"2261":1,"2270":0,"2284":1,"2292":0,"2316":1,"2326":0,"2350":1,"2362":0,"2377":1,"2414":0,"2455":1,"2497":0,"2562":1,"2569":0,"2577":1,"2582":0,"2603":1,"2608":0,"2638":1,"2644":0,"2689":1,"2696":0,"2728":1,"2737":0,"2769":1,"2773":0,"2800":1,"2808":0,"2832":1,"2837":0,"2846":1,"2851":0,"2858":1,"2862":0,"2868":1,"2872":0,"2889":1,"2895":0,"2905":1,"2916":0,"2936":1,"2941":0,"2962":1,"2966":0,"3009":1,"3014":0,"3051":1,"3056":0,"3063":1,"3068":0,"3075":1,"3081":0,"3158":1,"3162":0,"3165":1,"3171":0,"3191":1,"3195":0,"3197":1,"3203":0,"3223":1,"3229":0,"3241":1,"3248":0,"3291":1,"3297":0,"3332":1,"3338":0,"3377":1,"3384":0,"3402":1,"3410":0,"3438":1,"3444":0,"3494":1,"3501":0,"3512":1,"3518":0,"3587":1,"3592":0,"3605":1,"3611":0,"3633":1,"3639":0,"3692":1,"3699":0,"3717":1,"3724":0,"3731":1,"3736":0,"3742":1,"3747":0,"3785":1,"3791":0,"3811":1,"3816":0,"3830":1,"3834":0,"3836":1,"3840":0,"3845":1,"3862":0,"3899":1,"3902":0,"3905":1,"3907":0,"3914":1,"3918":0,"3951":1,"3957":0,"3965":1,"3971":0,"4009":1,"4017":0,"4049":1,"4057":0,"4089":1,"4096":0,"4126":1,"4136":0,"4167":1,"4170":0,"4200":1,"4211":0,"4245":1,"4251":0,"4269":1,"4277":0,"4304":1,"4309":0,"4350":1,"4354":0,"4369":1,"4370":0,"4383":1,"4388":0,"4414":1,"4419":0,"4426":1,"4432":0,"4502":1,"4507":0,"4530":1,"4536":0,"4553":1,"4560":0,"4591":1,"4600":0,"4621":1,"4627":0,"4656":1,"4663":0,"4688":1,"4698":0,"4711":1,"4720":0,"4732":1,"4741":0,"4783":1,"4792":0,"4844":1,"4848":0,"4851":1,"4856":0,"4937":1,"4942":0,"4964":1,"4970":0,"5000":1,"5007":0,"5038":1,"5045":0,"5077":1,"5084":0,"5103":1,"5111":0,"5150":1,"5157":0,"5212":1,"5225":0,"5264":1,"5273":0}'
+          ),
+          getAutopilotInputs = function (e, t, a = 1) {
+            const i = (function (e, t) {
+                switch (e) {
+                  case "Dragonfly":
+                    return Ym;
+                  case "Solar Wind":
+                    return Um;
+                  case "Indestructable":
+                    return jm;
+                  case "8 Bit Shuffle":
+                    return Gm;
+                  case "Think Different":
+                    return Vm;
+                  case "Solar Abyss":
+                    return Hm;
+                  case "Glitched Out":
+                    return Xm;
+                  case "Milky Ways":
+                    return zm;
+                  case "Critical Hit (Extended)":
+                    return Wm;
+                  case "Silverdust":
+                    return qm;
+                  case "Frontier":
+                    return $m;
+                  case "Theory Of Everything 3":
+                    return Jm;
+                  case "Accelerated":
+                    return Km;
+                  case "Sky Fracture":
+                    return Qm;
+                  case "Daydreamer":
+                    return Zm;
+                  case "True Colors":
+                    return ef;
+                  case "Color":
+                    return tf;
+                  case "Coincidence":
+                    return af;
+                  case "Mutant":
+                    return nf;
+                  case "Overdrive":
+                    return sf;
+                  case "Cloud 9":
+                    return of;
+                  case "Last Tile":
+                    return rf;
+                  case "Virtual":
+                    return cf;
+                  case "Nacreous Snowmelt":
+                    return df;
+                  case "Rum n' Bass":
+                    return uf;
+                  case "Funky Adventures":
+                    return faAuto;
+                  default:
+                    return {};
+                }
+              })(t, a),
+              n = (function (e) {
+                const t = Math.round(e),
+                  a = e - t;
+                return Math.abs(a) < 0.1 ? t : null;
+              })(e);
+            if (null === n) return null;
+            const s = i[String(n)];
+            return void 0 !== s ? Boolean(s) : null;
+          },
+          pf = function (e, t) {},
+          gf = function () {},
+          mf = function (e) {};
+        const ff = makeSprite({
+          init({ getContext: e, device: t, props: a }) {
+            if ((t.audio("audio/levels/level-complete.wav").play(0), a.world && a.checkpoints.length == 0)) {
+              const { online: i, achievementUnlocked: n } = e(Se),
+                { world: s, collectibles: o, score: r } = a;
+              i
+                ? (function (e, t, a, i, n, s) {
+                    return (
+                      (o = this),
+                      (r = void 0),
+                      (c = function* () {
+                        const { levelFileName: o, isCheckpoints: r } = yf(
+                          t,
+                          i,
+                          n,
+                        );
+                        yield bp
+                          .completedLevel(e, o, r, i, n)
+                          .then(({ hasPass: e, achievements: t }) => {
+                            t.forEach(({ justUnlocked: t, achievement: i }) => {
+                              t &&
+                                s(() => {
+                                  a(i, e);
+                                }, 2e3);
+                            });
+                          });
+                      }),
+                      new ((l = void 0) || (l = Promise))(function (e, t) {
+                        function a(e) {
+                          try {
+                            n(c.next(e));
+                          } catch (e) {
+                            t(e);
+                          }
+                        }
+                        function i(e) {
+                          try {
+                            n(c.throw(e));
+                          } catch (e) {
+                            t(e);
+                          }
+                        }
+                        function n(t) {
+                          var n;
+                          t.done
+                            ? e(t.value)
+                            : ((n = t.value),
+                              n instanceof l
+                                ? n
+                                : new l(function (e) {
+                                    e(n);
+                                  })).then(a, i);
+                        }
+                        n((c = c.apply(o, r || [])).next());
+                      })
+                    );
+                    var o, r, l, c;
+                  })(i.backend, s, n, o, r, t.timer.start).catch(() => {
+                    (t.alert.ok(
+                      "Failed to save achievement online, will try again later",
+                    ),
+                      Jp.addOfflineRequests(t.storage, [yf(s, o, r)]));
+                  })
+                : Jp.addOfflineRequests(t.storage, [yf(s, o, r)]);
+            }
+            return { frame: 0, opacity: 0 };
+          },
+          loop({ state: e }) {
+            e.opacity >= 1 || (e.frame++, e.frame > 100 && (e.opacity += 0.1));
+          },
+          render({ props: e, getContext: t, state: a, device: i }) {
+            const { animationAssets: n, animationRenderer: s } = t(Ws);
+>>>>>>> 8740d7ccb287389ed55f3dccfd4159210feb279a
             return [
               _e.Single(
                 {
