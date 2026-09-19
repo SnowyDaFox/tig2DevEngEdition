@@ -44219,6 +44219,7 @@ var version = "v1.17.2";
                   R(true, U.checkpoint.index, null));
               else {
                 null == v || v.hitFlag();
+                U.hitCheckpointFlag = true;
                 const t = Zr(
                   inViewLayout,
                   _.boss,
@@ -61937,7 +61938,7 @@ var version = "v1.17.2";
                   key: (e, t) => t,
                 }),
                 ifConditional(
-                  () => void 0 !== e.maxFrame && void 0 !== e.hasCheckpoints,
+                  () => false,
                   () => [
                     lm.Single(
                       {
@@ -63417,45 +63418,6 @@ var version = "v1.17.2";
                         (isSpecialTheme(t.theme) ? 25 : 50)));
                   },
                 ),
-                ifConditional(
-                  () => !i(Se).settings.hideUi,
-                  () => [
-                    Yo.Single(
-                      {
-                        text: localize("FLAG"),
-                        onPress: () => {
-                          (e.addCheckpoint());
-                        },
-                        width: Pm,
-                        height: Mm,
-                        x:
-                          Mm / -2,
-                        y: a.size.fullHeight / -2 + 40,
-                      },
-                      (e) => {
-                        ((e.x = Mm / -2),
-                          (e.y = a.size.fullHeight / -2 + 40));
-                      },
-                    ),
-                    Yo.Single(
-                      {
-                        text: "<",
-                        onPress: () => {
-                          (e.removeCheckpoint());
-                        },
-                        width: Mm,
-                        height: Mm,
-                        x:
-                          Pm / 2,
-                        y: a.size.fullHeight / -2 + 40,
-                      },
-                      (e) => {
-                        ((e.x = Pm / 2),
-                          (e.y = a.size.fullHeight / -2 + 40));
-                      },
-                    ),
-                  ]
-                ),
                 c({
                   text: localize(`PRACTICE MODE`),
                   font: { size: 15 },
@@ -63466,48 +63428,6 @@ var version = "v1.17.2";
                 }, (t) => {
                   t.opacity = +e.isPractice
                 }),
-                ifConditional(
-                  () => void 0 !== e.boosters,
-                  () => [
-                    Yo.Single(
-                      {
-                        text: localize("BOOSTERS"),
-                        onPress: () => {
-                          (e.boosters.onOpen(),
-                            e.onPause(),
-                            (t.boostersMenuOpen = true));
-                        },
-                        width: Pm,
-                        height: Mm,
-                        x:
-                          (a.size.fullWidth / 2 - 80) *
-                          (n.mirrorMenuButton ? -1 : 1),
-                        y: a.size.fullHeight / 2 - 50,
-                      },
-                      (e) => {
-                        ((e.x =
-                          (a.size.fullWidth / 2 - 80) *
-                          (i(Se).settings.mirrorMenuButton ? -1 : 1)),
-                          (e.y = a.size.fullHeight / 2 - 50));
-                      },
-                    ),
-                    ifConditional(
-                      () => e.boosters.showPrompt,
-                      () => [
-                        Fm.Single(
-                          {
-                            x: a.size.fullWidth / 2 - 40,
-                            y: a.size.fullHeight / 2 - 85,
-                          },
-                          (e) => {
-                            ((e.x = a.size.fullWidth / 2 - 40),
-                              (e.y = a.size.fullHeight / 2 - 85));
-                          },
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
                 ifConditional(
                   () => e.paused,
                   () => [
@@ -64866,6 +64786,7 @@ var version = "v1.17.2";
                     fullLayoutStateIndexes: E,
                   },
                   paused: false,
+                  quizActive: false,
                   pausedMusicDelay: 0,
                   playerInputIsDown: false,
                   hasStarted: !t.online,
@@ -65019,6 +64940,7 @@ var version = "v1.17.2";
               if (props.paused)
                 return void a.audio(props.level.song.fileName).pause();
               if (t.paused && !props.online) return;
+              if (t.quizActive) return;
               const { level: E, editor: b, mockPlayerInput: S } = props,
                 { levelSpeeds: I, df: _ } = t,
                 { speed: v } = I;
@@ -65290,6 +65212,33 @@ var version = "v1.17.2";
                   (t.mutValues = a.mutValues),
                   (t.playerInputIsDown =
                     "down" === a.playerInput || "justDown" === a.playerInput));
+              }
+
+              // --- checkpoint quiz ---
+              // A checkpoint flag was hit this frame, so freeze the game,
+              // pause the music and let quiz.js show the question overlay.
+              if (
+                t.mutValues.levelState.hitCheckpointFlag &&
+                !props.editor &&
+                !props.online &&
+                typeof window.startCheckpointQuiz === "function"
+              ) {
+                t.mutValues.levelState.hitCheckpointFlag = false;
+                t.quizActive = true;
+                t.pausedMusicDelay = y.headphonesDelay;
+                a.audio(props.level.song.fileName).pause();
+
+                window.startCheckpointQuiz(function () {
+                  t.quizActive = false;
+                  a.audio(props.level.song.fileName).play({
+                    overwrite: true,
+                    playbackRate: t.df,
+                    fromPosition:
+                      (1 / 60) * t.mutValues.levelState.frame +
+                      props.level.songStartSecs +
+                      y.headphonesDelay,
+                  });
+                });
               }
             },
             render({ props: e, state: t, device: a, getContext: i }) {
@@ -73459,7 +73408,16 @@ var version = "v1.17.2";
             init() {
               const e = [
                 ["CREATED BY", ["ED BENTLEY"]],
-                ["MODDED BY", ["d016"]],
+                ["ORIGINAL PLUS MOD BY", ["d016"]],
+                [
+                  "DEV ENG EDITION BY",
+                  [
+                    "SnowyDaFox M.6/5 No.29",
+                    "Khobfah M.6/5 No.19",
+                    "Sun M.6/5 No.21",
+                    "Kong M.6/5 No.25"
+                  ],
+                ],
                 ["INSPIRED BY", ["Alfredo/Outline Gamer"]],
                 [
                   "SPECIAL THANKS TO",
@@ -73531,9 +73489,11 @@ var version = "v1.17.2";
             render: ({ state: { content: e }, props: { beatScale: t } }) =>
               e.map(({ text: e, format: a, y: i }) => {
                 const s = "small" === a;
+                // names listed here show in yellow instead of white
+                const yellowNames = ["SnowyDaFox M.6/5 No.29"];
                 return n({
                   text: localize(e),
-                  color: s ? Oe : ve,
+                  color: s ? Oe : yellowNames.indexOf(e) >= 0 ? Te : ve,
                   y: i,
                   font: s
                     ? { size: 12, weight: 500 }
@@ -74201,37 +74161,27 @@ var version = "v1.17.2";
                     y: u,
                   }),
                   Wy({
-                    id: "Levels",
-                    text: localize("LEVELS"),
-                    onPress: () =>
-                      r({
-                        type: "levels",
-                        worldsView: { type: "worldsList" },
-                      }),
-                    y: -30,
-                    x: -200,
-                    disabled: false, // alright...
-                    shadowOffsetX: -1,
-                    shadowOffsetY: 0,
-                    beatSize: b,
-                  }),
-                  Wy({
-                    id: "Editor",
-                    text: localize("EDITOR"),
-                    onPress: () => r({ type: "editor" }),
+                    id: "Play",
+                    text: localize("PLAY"),
+                    onPress: () => {
+                      p();
+                      e.playWorldLevel(
+                        {
+                          levelName: "DevEng",
+                          levelFileName: "DevEng",
+                          boss: null,
+                          maxFrames: 0,
+                        },
+                        {
+                          number: 1,
+                          levelIndex: 0,
+                          withCheckpoints: true,
+                        },
+                      );
+                    },
                     y: -30,
                     shadowOffsetX: 0,
                     shadowOffsetY: -1,
-                    beatSize: b,
-                  }),
-                  Wy({
-                    id: "Online",
-                    text: localize("SKINS"), //ONLINE"),
-                    onPress: () => r({ type: "online" }),
-                    x: 200,
-                    y: -30,
-                    shadowOffsetX: 1,
-                    shadowOffsetY: 0,
                     beatSize: b,
                   }),
                   
@@ -78097,14 +78047,7 @@ var version = "v1.17.2";
                       })
                     : a.updateView({
                         type: "menu",
-                        menuView: {
-                          type: "levels",
-                          worldsView: {
-                            type: "inWorld",
-                            world: a.world.number,
-                            backToWorld: a.world.number || 1,
-                          },
-                        },
+                        menuView: { type: "main" },
                       }));
               },
               didStart: (t, i) => {

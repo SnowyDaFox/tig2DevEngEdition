@@ -1,5 +1,5 @@
 // stolen from Snap! ( https://github.com/jmoenig/Snap/blob/master/sw.js )
-var version = "1.1.2",
+var version = "1.1.9",
   cacheName = `tig2plus-pwa-${version}`,
   basicFiles = [
     "./index.html",

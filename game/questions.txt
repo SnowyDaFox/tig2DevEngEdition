@@ -1,0 +1,709 @@
+# Checkpoint quiz questions - phrasal verbs (literal and idiomatic)
+# Format for each question:
+#   Q: the sentence, with ______ for the blank
+#   A: first choice
+#   B: second choice
+#   C: third choice
+#   D: fourth choice
+#   ANS: the letter of the correct choice
+# Leave a blank line between questions. Lines starting with # are ignored.
+
+Q: After the argument, she decided to ______ the relationship for good.
+A: let off
+B: break off
+C: run down
+D: get over
+ANS: B
+
+Q: Why don't you ______ to my place tonight for dinner?
+A: get on
+B: run by
+C: rip off
+D: come over
+ANS: D
+
+Q: You can always ______ me if you need help moving.
+A: run down
+B: get at
+C: let off
+D: count on
+ANS: D
+
+Q: I don't understand what you're trying to ______ - can you explain more clearly?
+A: run by
+B: come over
+C: get at
+D: break off
+ANS: C
+
+Q: We need to ______ the bus before it leaves the station.
+A: rip off
+B: get over
+C: get on
+D: run down
+ANS: C
+
+Q: It took him months to ______ the loss of his job.
+A: break off
+B: run by
+C: let off
+D: get over
+ANS: D
+
+Q: The police decided to ______ the teenager with just a warning.
+A: count on
+B: run down
+C: get at
+D: let off
+ANS: D
+
+Q: That shop tried to ______ me - the price was triple what it should be!
+A: break off
+B: get on
+C: rip off
+D: run by
+ANS: C
+
+Q: Could you ______ the report with me before you send it?
+A: get over
+B: let off
+C: run by
+D: come over
+ANS: C
+
+Q: The critics really ______ the new movie, calling it a waste of time.
+A: run down
+B: count on
+C: break off
+D: get on
+ANS: A
+
+Q: He ______ a corner of the biscuit to taste it.
+A: ran by
+B: broke off
+C: got at
+D: came over
+ANS: B
+
+Q: Could you ______ to my desk and look at this screen?
+A: count on
+B: get over
+C: break off
+D: come over
+ANS: D
+
+Q: Little Mia still ______ her fingers when she does subtraction.
+A: rips off
+B: lets off
+C: counts on
+D: gets at
+ANS: C
+
+Q: The cat climbed the shelf to ______ the food bowl.
+A: run by
+B: come over
+C: get at
+D: break off
+ANS: C
+
+Q: Passengers began to ______ the ferry as soon as it docked.
+A: get over
+B: rip off
+C: let off
+D: get on
+ANS: D
+
+Q: The thief climbed a ladder to ______ the high fence.
+A: get over
+B: get on
+C: run by
+D: break off
+ANS: A
+
+Q: She unclipped the lead to ______ the puppy in the park.
+A: let off
+B: run down
+C: get at
+D: rip off
+ANS: A
+
+Q: He ______ the wrapping paper in one quick motion.
+A: counted on
+B: ripped off
+C: broke off
+D: let off
+ANS: B
+
+Q: A police car ______ the house without stopping.
+A: broke off
+B: ran by
+C: came over
+D: got on
+ANS: B
+
+Q: The dog ______ the beach chasing the ball.
+A: counted on
+B: let off
+C: got at
+D: ran down
+ANS: D
+
+Q: She ______ their friendship after discovering he had lied.
+A: broke off
+B: got at
+C: ran by
+D: let off
+ANS: A
+
+Q: At first he ______ as unfriendly, but he's actually very kind.
+A: counts on
+B: comes over
+C: rips off
+D: gets on
+ANS: B
+
+Q: In an emergency, we ______ our neighbours for help.
+A: get at
+B: break off
+C: run down
+D: count on
+ANS: D
+
+Q: What exactly are you ______? Just say what you mean.
+A: letting off
+B: getting at
+C: running by
+D: getting on
+ANS: B
+
+Q: I ______ well with my new colleagues.
+A: rip off
+B: get on
+C: get over
+D: run down
+ANS: B
+
+Q: It's hard to ______ the shock of such bad news.
+A: count on
+B: get on
+C: let off
+D: get over
+ANS: D
+
+Q: The teacher ______ the students with a warning this time.
+A: let off
+B: ran by
+C: came over
+D: broke off
+ANS: A
+
+Q: Tourists often get ______ by unlicensed taxis.
+A: ripped off
+B: let off
+C: run by
+D: broken off
+ANS: A
+
+Q: Did you ______ the boss before booking the flights?
+A: break off
+B: get over
+C: let off
+D: run it by
+ANS: D
+
+Q: He's always ______ his own country when he's abroad.
+A: getting on
+B: running down
+C: counting on
+D: coming over
+ANS: B
+
+Q: A piece of the statue's arm ______ when it fell.
+A: counted on
+B: let off
+C: ran by
+D: broke off
+ANS: D
+
+Q: Grandma asked us to ______ for tea on Sunday.
+A: come over
+B: run down
+C: get at
+D: rip off
+ANS: A
+
+Q: The child ______ his fingers to check he had ten sweets.
+A: broke off
+B: got over
+C: counted on
+D: let off
+ANS: C
+
+Q: The keys fell behind the sofa and I couldn't ______ them.
+A: get on
+B: come over
+C: get at
+D: run by
+ANS: C
+
+Q: Please ______ the bus at the front and pay the driver.
+A: get over
+B: break off
+C: get on
+D: let off
+ANS: C
+
+Q: The rabbit ______ the low wall and escaped.
+A: got on
+B: ripped off
+C: got over
+D: ran by
+ANS: C
+
+Q: He opened the cage to ______ the birds.
+A: let off
+B: run down
+C: count on
+D: get at
+ANS: A
+
+Q: She ______ the old wallpaper in long strips.
+A: ran by
+B: let off
+C: got on
+D: ripped off
+ANS: D
+
+Q: The train ______ the platform without slowing.
+A: ran by
+B: broke off
+C: came over
+D: counted on
+ANS: A
+
+Q: The children ______ the hill toward the lake.
+A: ran down
+B: let off
+C: ripped off
+D: got at
+ANS: A
+
+Q: Negotiations were ______ when the two sides couldn't agree.
+A: broken off
+B: run by
+C: let off
+D: got at
+ANS: A
+
+Q: He ______ as very confident on stage.
+A: lets off
+B: runs down
+C: comes over
+D: gets at
+ANS: C
+
+Q: Don't ______ the weather being good in April.
+A: rip off
+B: break off
+C: count on
+D: get over
+ANS: C
+
+Q: My sister keeps ______ me about my untidy room.
+A: running by
+B: coming over
+C: getting at
+D: getting on
+ANS: C
+
+Q: The two cats didn't ______ at first, but now they're inseparable.
+A: get on
+B: let off
+C: rip off
+D: get over
+ANS: A
+
+Q: I still haven't ______ how rude he was to me.
+A: let off
+B: got on
+C: counted on
+D: got over
+ANS: D
+
+Q: Because it was his first offence, the court ______ him lightly.
+A: let off
+B: ran down
+C: came over
+D: broke off
+ANS: A
+
+Q: That "designer" bag was fake - we were completely ______.
+A: broken off
+B: ripped off
+C: run by
+D: let off
+ANS: B
+
+Q: Can I ______ you? I'd like your opinion on it.
+A: run this by
+B: get over
+C: let off
+D: break off
+ANS: A
+
+Q: Newspapers ______ the player unfairly after one bad match.
+A: ran down
+B: counted on
+C: got on
+D: came over
+ANS: A
+
+Q: She ______ a small piece of bread for the ducks.
+A: got at
+B: ran down
+C: let off
+D: broke off
+ANS: D
+
+Q: Some of the guests will ______ after work.
+A: get at
+B: rip off
+C: break off
+D: come over
+ANS: D
+
+Q: He ______ his fingers because there was no calculator nearby.
+A: ran by
+B: counted on
+C: let off
+D: got over
+ANS: B
+
+Q: The branch was too high for the goat to ______.
+A: run by
+B: come over
+C: get on
+D: get at
+ANS: D
+
+Q: Everyone must ______ the coach before it departs at 8 a.m.
+A: get over
+B: let off
+C: break off
+D: get on
+ANS: D
+
+Q: The wall was too high for the old man to ______.
+A: let off
+B: run by
+C: get on
+D: get over
+ANS: D
+
+Q: The trainer ______ the horse to graze freely.
+A: got at
+B: ran down
+C: counted on
+D: let off
+ANS: D
+
+Q: He ______ the bandage too quickly and it hurt.
+A: ripped off
+B: got on
+C: let off
+D: broke off
+ANS: A
+
+Q: An ambulance ______ the school gates at high speed.
+A: ran by
+B: came over
+C: broke off
+D: counted on
+ANS: A
+
+Q: The stream ______ the valley into the sea.
+A: gets at
+B: lets off
+C: runs down
+D: rips off
+ANS: C
+
+Q: He ______ the deal at the last minute.
+A: broke off
+B: let off
+C: got on
+D: ran by
+ANS: A
+
+Q: Although she was nervous, she ______ as calm and professional.
+A: ripped off
+B: came over
+C: got at
+D: ran down
+ANS: B
+
+Q: A good leader is someone the team can ______.
+A: get at
+B: run down
+C: count on
+D: break off
+ANS: C
+
+Q: I'm not sure what she's ______ with all these hints.
+A: running by
+B: getting at
+C: getting over
+D: letting off
+ANS: B
+
+Q: Do you ______ with your new flatmates?
+A: rip off
+B: get over
+C: let off
+D: get on
+ANS: D
+
+Q: It may take time, but you'll ______ this disappointment.
+A: break off
+B: get over
+C: count on
+D: get on
+ANS: B
+
+Q: The guard ______ the boy with a warning about the broken window.
+A: ran down
+B: let off
+C: got at
+D: came over
+ANS: B
+
+Q: The website ______ thousands of customers before it was shut down.
+A: ripped off
+B: let off
+C: broke off
+D: ran by
+ANS: A
+
+Q: Always ______ your manager before promising a deadline.
+A: break off
+B: run it by
+C: let off
+D: get over
+ANS: B
+
+Q: He's always ______ his brother's achievements to look better himself.
+A: getting on
+B: running down
+C: coming over
+D: letting off
+ANS: B
+
+Q: A large chunk of ice ______ the glacier and fell into the sea.
+A: let off
+B: got at
+C: broke off
+D: ran down
+ANS: C
+
+Q: "Why don't you ______ later?" she asked, handing me her address.
+A: run by
+B: rip off
+C: come over
+D: get over
+ANS: C
+
+Q: Investors ______ steady profits, but the market crashed.
+A: got at
+B: counted on
+C: let off
+D: broke off
+ANS: B
+
+Q: The journalist kept ______ the minister about the scandal.
+A: running by
+B: letting off
+C: getting on
+D: getting at
+ANS: D
+
+Q: My parents ______ surprisingly well with my girlfriend.
+A: run by
+B: get over
+C: get on
+D: rip off
+ANS: C
+
+Q: Once you ______ the first hill, the rest of the walk is easy.
+A: get over
+B: get on
+C: let off
+D: count on
+ANS: A
+
+Q: The referee ______ the player with only a yellow card.
+A: ran down
+B: broke off
+C: let off
+D: came over
+ANS: C
+
+Q: She ______ her mask as soon as she got outside.
+A: ran by
+B: let off
+C: counted on
+D: ripped off
+ANS: D
+
+Q: Let me ______ my colleague before I confirm anything.
+A: break off
+B: run it by
+C: let off
+D: get over
+ANS: B
+
+Q: Critics unfairly ______ the film before it was even released.
+A: got on
+B: ran down
+C: counted on
+D: came over
+ANS: B
+
+Q: The handle ______ the mug when he dropped it.
+A: broke off
+B: let off
+C: got at
+D: ran by
+ANS: A
+
+Q: A few friends are ______ to watch the match tonight.
+A: getting at
+B: ripping off
+C: running down
+D: coming over
+ANS: D
+
+Q: You can't ______ the train being on time during a storm.
+A: break off
+B: count on
+C: get at
+D: let off
+ANS: B
+
+Q: Are you ______ me again about last week's mistake?
+A: running by
+B: getting on
+C: getting at
+D: coming over
+ANS: C
+
+Q: Please ______ the plane through the rear door.
+A: rip off
+B: get over
+C: get on
+D: let off
+ANS: C
+
+Q: He needed a ladder to ______ the garden wall.
+A: run by
+B: get over
+C: get at
+D: break off
+ANS: B
+
+Q: The officer ______ her with a caution instead of a fine.
+A: came over
+B: broke off
+C: let off
+D: ran down
+ANS: C
+
+Q: The wind ______ half the roof tiles during the storm.
+A: ran by
+B: let off
+C: counted on
+D: ripped off
+ANS: D
+
+Q: Two cyclists ______ us on the narrow path.
+A: ran by
+B: let off
+C: came over
+D: got on
+ANS: A
+
+Q: Water ______ the windows during the heavy rain.
+A: got at
+B: ripped off
+C: ran down
+D: let off
+ANS: C
+
+Q: They ______ all contact after the argument.
+A: got on
+B: let off
+C: ran by
+D: broke off
+ANS: D
+
+Q: In her emails she ______ as rather cold, but she's friendly in person.
+A: gets at
+B: comes over
+C: rips off
+D: counts on
+ANS: B
+
+Q: We're ______ you to bring the drinks tomorrow.
+A: running down
+B: breaking off
+C: counting on
+D: getting at
+ANS: C
+
+Q: I can't tell what he's ______ - his explanation is too vague.
+A: letting off
+B: getting at
+C: running by
+D: getting on
+ANS: B
+
+Q: The new students ______ well with everyone in the class.
+A: get on
+B: let off
+C: get over
+D: rip off
+ANS: A
+
+Q: She never really ______ the death of her grandfather.
+A: counted on
+B: broke off
+C: got over
+D: got on
+ANS: C
+
+Q: He was ______ with community service rather than a prison sentence.
+A: let off
+B: run down
+C: broken off
+D: come over
+ANS: A
+
+Q: Online scammers ______ elderly people out of their savings.
+A: break off
+B: rip off
+C: run by
+D: let off
+ANS: B
+
+Q: Could you ______ your supervisor before you order the equipment?
+A: let off
+B: break off
+C: get over
+D: run it by
+ANS: D
+
+Q: Politicians often ______ their opponents during debates.
+A: get on
+B: count on
+C: come over
+D: run down
+ANS: D
